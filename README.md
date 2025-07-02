@@ -1,6 +1,6 @@
-## 📚 Articalize
+## 📚 Articlize
 
-**Articalize** is an open-source application that helps you **save, organize, and view articles** in a beautiful, card-based layout. Whether you're a researcher, reader, or knowledge hoarder, Articalize makes your reading list tidy and accessible.
+**Articlize** is an open-source application that helps you **save, organize, and view articles** in a beautiful, card-based layout. Whether you're a researcher, reader, or knowledge hoarder, Articlize makes your reading list tidy and accessible.
 
 ---
 
@@ -62,7 +62,7 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 
 ### 💬 Community & Feedback
 
-* Issues and feature requests → [GitHub Issues](https://github.com/yourusername/articalize/issues)
-* Discussions and ideas → [GitHub Discussions](https://github.com/yourusername/articalize/discussions)
+* Issues and feature requests → [GitHub Issues](https://github.com/yourusername/Articlize/issues)
+* Discussions and ideas → [GitHub Discussions](https://github.com/yourusername/Articlize/discussions)
 
 ---
