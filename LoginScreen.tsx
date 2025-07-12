@@ -15,7 +15,7 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = () => {
     console.log('Logging in with:', email, password);
-    // You can navigate to Dashboard here later
+    navigation.replace('Dashboard');
   };
 
   return (

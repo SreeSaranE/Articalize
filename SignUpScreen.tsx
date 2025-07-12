@@ -15,7 +15,7 @@ export default function SignUpScreen({ navigation }: any) {
 
   const handleSignUp = () => {
     console.log('Signing up with:', email, password);
-    // Add actual sign-up logic later
+    navigation.replace('Dashboard');
   };
 
   return (
