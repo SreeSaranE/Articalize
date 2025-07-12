@@ -1,86 +1,176 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
+  StyleSheet,
+  Modal,
   useColorScheme,
-  SafeAreaView,
-  StatusBar,
-  Platform
 } from 'react-native';
-import { sampleArticles } from './articles';
+import { sampleArticles, Article } from './articles';
+ // Make sure this path is correct
 
 export default function DashboardScreen() {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const isDarkMode = colorScheme === 'dark';
+
+  const [articles, setArticles] = useState<Article[]>(sampleArticles);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [gridView, setGridView] = useState(false);
+
+  const handleLongPress = (item: Article) => {
+    setSelectedArticle(item);
+    setPopupVisible(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedArticle) {
+      setArticles((prev) => prev.filter((a) => a.id !== selectedArticle.id));
+      setSelectedArticle(null);
+      setPopupVisible(false);
+    }
+  };
+
+  const handleAddToCollection = () => {
+    console.log(`Add ${selectedArticle?.title} to collection`);
+    setPopupVisible(false);
+  };
+
+  const renderItem = ({ item }: { item: Article }) => (
+    <TouchableOpacity
+      style={[styles.articleItem, gridView && styles.articleGridItem]}
+      onLongPress={() => handleLongPress(item)}
+    >
+      <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>{item.title}</Text>
+      <Text style={styles.articleSummary}>{item.summary}</Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={colorScheme === 'dark' ? '#121212' : '#FFFFFF'}
-      />
-      <View style={styles.container}>
-        <Text style={styles.header}>Dashboard</Text>
-
-        <FlatList
-          data={sampleArticles}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.articleCard}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.author}>By {item.author}</Text>
-              <Text style={styles.summary}>{item.summary}</Text>
-            </TouchableOpacity>
-          )}
-          contentContainerStyle={styles.listContent}
-        />
+    <View style={[styles.container, { backgroundColor: isDarkMode ? '#111' : '#f0f0f0' }]}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>Dashboard</Text>
+        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>{articles.length} Articles Saved</Text>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+            onPress={() => setGridView(!gridView)}
+          >
+            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
+              {gridView ? 'List View' : 'Grid View'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+            onPress={() => console.log('Add button pressed')}
+          >
+            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Add</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </SafeAreaView>
+
+      <FlatList
+        data={articles}
+        key={gridView ? 'g' : 'l'}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        numColumns={gridView ? 2 : 1}
+        contentContainerStyle={{ padding: 10 }}
+      />
+
+      <Modal
+        visible={popupVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPopupVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#222' : '#fff' }]}>
+            <Text style={{ fontSize: 18, marginBottom: 16, color: isDarkMode ? '#fff' : '#000' }}>
+              {selectedArticle?.title}
+            </Text>
+            <TouchableOpacity style={styles.modalButton} onPress={handleAddToCollection}>
+              <Text style={styles.modalButtonText}>Add to Collection</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={handleDelete}>
+              <Text style={styles.modalButtonText}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setPopupVisible(false)}>
+              <Text style={{ marginTop: 12, color: '#888', textAlign: 'center' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
-function getStyles(colorScheme: 'light' | 'dark' | null | undefined) {
-  return StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: colorScheme === 'dark' ? '#121212' : '#FFFFFF',
-    },
-    container: {
-      flex: 1,
-      paddingHorizontal: 16,
-      paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Ensures no overlap on Android
-    },
-    header: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 16,
-      color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
-    },
-    listContent: {
-      paddingBottom: 20,
-    },
-    articleCard: {
-      marginBottom: 16,
-      padding: 16,
-      backgroundColor: colorScheme === 'dark' ? '#1E1E1E' : '#F5F5F5',
-      borderRadius: 8,
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
-    },
-    author: {
-      fontSize: 14,
-      color: colorScheme === 'dark' ? '#CCCCCC' : '#555555',
-      marginTop: 4,
-    },
-    summary: {
-      marginTop: 8,
-      color: colorScheme === 'dark' ? '#AAAAAA' : '#333333',
-    },
-  });
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  headerButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  articleItem: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  articleGridItem: {
+    marginHorizontal: 5,
+    flexBasis: '48%',
+  },
+  articleTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  articleSummary: {
+    marginTop: 6,
+    fontSize: 14,
+    color: '#666',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    borderRadius: 12,
+    elevation: 5,
+  },
+  modalButton: {
+    backgroundColor: '#4F46E5',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+});
