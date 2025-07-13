@@ -5,54 +5,52 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Modal,
   useColorScheme,
 } from 'react-native';
 import { sampleArticles, Article } from './articles';
- // Make sure this path is correct
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types';
 
 export default function DashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
   const [articles, setArticles] = useState<Article[]>(sampleArticles);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [popupVisible, setPopupVisible] = useState(false);
   const [gridView, setGridView] = useState(false);
 
-  const handleLongPress = (item: Article) => {
-    setSelectedArticle(item);
-    setPopupVisible(true);
-  };
-
-  const handleDelete = () => {
-    if (selectedArticle) {
-      setArticles((prev) => prev.filter((a) => a.id !== selectedArticle.id));
-      setSelectedArticle(null);
-      setPopupVisible(false);
-    }
-  };
-
-  const handleAddToCollection = () => {
-    console.log(`Add ${selectedArticle?.title} to collection`);
-    setPopupVisible(false);
+  const handlePress = (item: Article) => {
+    navigation.navigate('ArticleDetail', { article: item });
   };
 
   const renderItem = ({ item }: { item: Article }) => (
     <TouchableOpacity
-      style={[styles.articleItem, gridView && styles.articleGridItem]}
-      onLongPress={() => handleLongPress(item)}
+      style={[
+        styles.articleItem,
+        gridView && styles.articleGridItem,
+        { backgroundColor: isDarkMode ? '#222' : '#fff' },
+      ]}
+      onPress={() => handlePress(item)}
     >
-      <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>{item.title}</Text>
-      <Text style={styles.articleSummary}>{item.summary}</Text>
+      <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
+        {item.title}
+      </Text>
+      <Text style={[styles.articleSummary, { color: isDarkMode ? '#aaa' : '#666' }]}>
+        {item.summary}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: isDarkMode ? '#111' : '#f0f0f0' }]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>Dashboard</Text>
-        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>{articles.length} Articles Saved</Text>
+        <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
+          Dashboard
+        </Text>
+        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>
+          {articles.length} Articles Saved
+        </Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
@@ -79,38 +77,12 @@ export default function DashboardScreen() {
         numColumns={gridView ? 2 : 1}
         contentContainerStyle={{ padding: 10 }}
       />
-
-      <Modal
-        visible={popupVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setPopupVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#222' : '#fff' }]}>
-            <Text style={{ fontSize: 18, marginBottom: 16, color: isDarkMode ? '#fff' : '#000' }}>
-              {selectedArticle?.title}
-            </Text>
-            <TouchableOpacity style={styles.modalButton} onPress={handleAddToCollection}>
-              <Text style={styles.modalButtonText}>Add to Collection</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleDelete}>
-              <Text style={styles.modalButtonText}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setPopupVisible(false)}>
-              <Text style={{ marginTop: 12, color: '#888', textAlign: 'center' }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     paddingTop: 50,
     paddingHorizontal: 20,
@@ -132,7 +104,6 @@ const styles = StyleSheet.create({
   },
   articleItem: {
     flex: 1,
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 10,
     marginBottom: 10,
@@ -148,29 +119,5 @@ const styles = StyleSheet.create({
   articleSummary: {
     marginTop: 6,
     fontSize: 14,
-    color: '#666',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    borderRadius: 12,
-    elevation: 5,
-  },
-  modalButton: {
-    backgroundColor: '#4F46E5',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 8,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: '600',
   },
 });

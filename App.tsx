@@ -1,12 +1,13 @@
 import React from 'react';
-import { SafeAreaView, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import Navigation from './Navigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaProvider>
+      <StatusBar backgroundColor="#000" barStyle="light-content" />
       <Navigation />
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 }

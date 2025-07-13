@@ -3,7 +3,7 @@ export type Article = {
   title: string;
   author: string;
   summary: string;
-  link: string;
+  url: string;
 };
 
 export const sampleArticles: Article[] = [
@@ -12,13 +12,13 @@ export const sampleArticles: Article[] = [
     title: 'The Rise of Artificial Intelligence',
     author: 'Jane Doe',
     summary: 'Artificial Intelligence is transforming industries.',
-    link: 'https://www.example.com/article1'
+    url: 'https://www.example.com/article1'
   },
   {
     id: '2',
     title: 'Exploring the Universe',
     author: 'John Smith',
     summary: 'A journey through space and time.',
-    link: 'https://www.example.com/article2'
+    url: 'https://www.example.com/article2'
   }
 ];

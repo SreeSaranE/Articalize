@@ -22,7 +22,7 @@ export default function SignUpScreen({ navigation }: any) {
 
   return (
     <ImageBackground
-      source={require('./assets/1.jpg')} // Ensure this file exists
+      source={require('./assets/1.jpg')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -38,7 +38,7 @@ export default function SignUpScreen({ navigation }: any) {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor="#999"
+            placeholderTextColor="#ccc"
             keyboardType="email-address"
             autoCapitalize="none"
             value={email}
@@ -48,7 +48,7 @@ export default function SignUpScreen({ navigation }: any) {
           <TextInput
             style={styles.input}
             placeholder="Password"
-            placeholderTextColor="#999"
+            placeholderTextColor="#ccc"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -79,28 +79,31 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 32,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   innerContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 16,
     padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 32,
     textAlign: 'center',
-    color: '#222',
+    color: '#fff',
   },
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 10,
     paddingHorizontal: 16,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    color: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   button: {
     backgroundColor: '#4F46E5',
@@ -120,7 +123,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footerText: {
-    color: '#555',
+    color: '#ccc',
   },
   footerLink: {
     color: '#4F46E5',
