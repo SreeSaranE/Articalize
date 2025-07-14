@@ -3,4 +3,5 @@ export type RootStackParamList = {
   SignUp: undefined;
   Home: undefined;
   ArticleDetail: { article: { title: string; summary: string; url: string } };
+  PrivacyPolicy: undefined;
 };

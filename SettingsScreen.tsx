@@ -1,25 +1,106 @@
-// SettingsScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+  useColorScheme,
+  Image,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types'
+import { Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
-  const handleEditProfile = () => {
-    console.log('Edit Profile Pressed');
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const navigation = useNavigation<NavigationProp>();
+
+
+  const handleExportData = async () => {
+      try {
+        const data = {
+          username: 'SREESARAN E',
+          articles: [], // Add real app data here
+        };
+
+        const json = JSON.stringify(data, null, 2);
+
+        const fileUri = FileSystem.documentDirectory + 'data-export.json';
+        await FileSystem.writeAsStringAsync(fileUri, json);
+
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri);
+        } else {
+          alert('Sharing is not available on this device');
+        }
+      } catch (error) {
+        console.error('Export failed:', error);
+        alert('Failed to export data');
+      }
+    };
+
+  const handleSignOut = () => {
+    navigation.replace('Login');
+  };
+
+  const handlePrivacyPolicy = () => {
+  navigation.navigate('PrivacyPolicy');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.profileSection}>
-        <Text style={styles.username}>Username</Text>
-        <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#111' : '#fff' }}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+        ]}
+      >
+        <Text style={[styles.headerText, { color: isDarkMode ? '#fff' : '#000' }]}>Settings</Text>
 
-      <View style={styles.otherSection}>
-        <Text style={styles.sectionTitle}>Settings</Text>
-        <Text style={styles.settingItem}>Notifications</Text>
-        <Text style={styles.settingItem}>Privacy</Text>
+        {/* Profile Section */}
+        <View style={styles.profileContainer}>
+          <Image
+            source={require('./assets/dp.jpg')}
+            style={styles.profileImage}
+          />
+          <Text style={[styles.username, { color: isDarkMode ? '#fff' : '#000' }]}>
+            SREESARAN E
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
+            Export Data
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
+            Privacy Policy
+          </Text>
+        </TouchableOpacity>
+
+        <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>
+            Version 1.0.0
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -28,42 +109,33 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    backgroundColor: '#fff',
+    paddingHorizontal: 20,
   },
-  profileSection: {
-    padding: 20,
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  username: {
+  headerText: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 24,
   },
-  editButton: {
-    marginTop: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#4F46E5',
-    borderRadius: 8,
+  profileContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
   },
-  editButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  otherSection: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     marginBottom: 10,
   },
+  username: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
   settingItem: {
-    fontSize: 16,
-    paddingVertical: 8,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderColor: '#ccc',
+  },
+  settingText: {
+    fontSize: 16,
   },
 });
