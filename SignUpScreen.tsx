@@ -9,9 +9,16 @@ import {
   Platform,
   ImageBackground,
   StatusBar,
+  useColorScheme,
 } from 'react-native';
 
 export default function SignUpScreen({ navigation }: any) {
+
+  const colorScheme = useColorScheme();
+  const backgroundImage = colorScheme === 'dark'
+    ? require('./assets/dark.jpg')
+    : require('./assets/light.jpg');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -22,23 +29,28 @@ export default function SignUpScreen({ navigation }: any) {
 
   return (
     <ImageBackground
-      source={require('./assets/1.jpg')}
+      source={backgroundImage}
       style={styles.background}
       resizeMode="cover"
     >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
 
       <KeyboardAvoidingView
-        style={styles.overlay}
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.innerContainer}>
-          <Text style={styles.title}>Create Account</Text>
+        <Text style={[styles.title, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}>
+            Create Account
+          </Text>
 
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
             keyboardType="email-address"
             autoCapitalize="none"
             value={email}
@@ -48,7 +60,7 @@ export default function SignUpScreen({ navigation }: any) {
           <TextInput
             style={styles.input}
             placeholder="Password"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -59,12 +71,12 @@ export default function SignUpScreen({ navigation }: any) {
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account?</Text>
+            <Text style={{ color: colorScheme === 'dark' ? '#fff' : '#000' }}>
+              Already have an account?</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.footerLink}> Log in</Text>
             </TouchableOpacity>
           </View>
-        </View>
       </KeyboardAvoidingView>
     </ImageBackground>
   );
@@ -75,18 +87,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  overlay: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 32,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  innerContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
