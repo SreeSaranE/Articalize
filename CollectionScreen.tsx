@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Collection } from './types';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function CollectionsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -28,6 +29,12 @@ export default function CollectionsScreen() {
   useEffect(() => {
     loadCollections();
   }, []);
+
+  useFocusEffect(
+      React.useCallback(() => {
+        loadCollections();
+      }, [])
+    );
 
   const loadCollections = async () => {
     try {

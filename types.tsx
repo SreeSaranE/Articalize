@@ -5,6 +5,7 @@ export type RootStackParamList = {
   ArticleDetail: { article: Article };
   PrivacyPolicy: undefined;
   CollectionDetail: { collection: Collection };
+  AddToCollection: { article: Article };
 };
 
 export type Article = {

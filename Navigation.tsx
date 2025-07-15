@@ -5,8 +5,10 @@ import LoginScreen from './LoginScreen';
 import SignUpScreen from './SignUpScreen';
 import BottomTabsNavigation from './BottomTabsNavigation';
 import ArticleDetailScreen from './ArticleDetailScreen';
-import { RootStackParamList } from './types'; // Make sure this exists and is correct
+import { RootStackParamList } from './types';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
+import AddToCollectionScreen from './AddToCollectionScreen';
+import CollectionDetailScreen from './CollectionDetailScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -19,7 +21,8 @@ export default function Navigation() {
         <Stack.Screen name="Home" component={BottomTabsNavigation} />
         <Stack.Screen name="ArticleDetail" component={ArticleDetailScreen} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-
+        <Stack.Screen name="AddToCollection" component={AddToCollectionScreen} />
+        <Stack.Screen name="CollectionDetail" component={CollectionDetailScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

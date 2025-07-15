@@ -81,7 +81,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
       >
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
-          onPress={handleAddToCollection}
+          onPress={() => navigation.navigate('AddToCollection', { article })}
         >
           <Text style={[styles.actionButtonText, { color: '#fff' }]}>Add to Collection</Text>
         </TouchableOpacity>
@@ -123,5 +123,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  actionButtonText: { fontWeight: '600' },
+  actionButtonText: {
+    fontWeight: '600' },
+    addToCollectionButton: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  addToCollectionText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
