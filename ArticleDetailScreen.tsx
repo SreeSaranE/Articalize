@@ -12,7 +12,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
+import { RootStackParamList, Article } from './types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ArticleDetailProps = NativeStackScreenProps<RootStackParamList, 'ArticleDetail'>;
 
@@ -26,9 +27,18 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     navigation.goBack();
   };
 
-  const handleDelete = () => {
-    console.log(`Deleted ${article.title}`);
-    navigation.goBack();
+  const handleDelete = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('articles');
+      if (stored) {
+        const articles = JSON.parse(stored);
+        const updatedArticles = articles.filter((a: Article) => a.id !== article.id);
+        await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.log('Error deleting article:', error);
+    }
   };
 
   return (
@@ -43,7 +53,8 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     >
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>{article.title}</Text>
-        <Text style={[styles.summary, { color: isDarkMode ? '#ccc' : '#333' }]}>{article.summary}</Text>
+        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>{article.id}</Text>
+        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>{article.dateAdded}</Text>
 
         <TouchableOpacity
           onPress={() => Linking.openURL(article.url)}

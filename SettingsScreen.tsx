@@ -112,18 +112,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: 25,
   },
   profileContainer: {
     alignItems: 'center',
     marginBottom: 30,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     marginBottom: 10,
   },
   username: {

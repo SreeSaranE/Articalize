@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   useColorScheme,
 } from 'react-native';
-import { sampleArticles, Article } from './articles';
+import { sampleArticles } from './articles';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList, Article } from './types';
+import { fetchPageTitle } from './fetchPageTitle';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type DashboardScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -18,10 +23,59 @@ export default function DashboardScreen() {
   const isDarkMode = colorScheme === 'dark';
 
   const [articles, setArticles] = useState<Article[]>(sampleArticles);
+  const [linkInputValue, setLinkInputValue] = useState('');
+  const [showInput, setShowInput] = useState(false);
   const [gridView, setGridView] = useState(false);
+
+  useEffect(() => {
+    loadArticles();
+  }, []);
 
   const handlePress = (item: Article) => {
     navigation.navigate('ArticleDetail', { article: item });
+  };
+
+  const loadArticles = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('articles');
+      if (stored) {
+        setArticles(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.log('Failed to load articles', error);
+    }
+  };
+
+  const saveArticles = async (updatedArticles: Article[]) => {
+    try {
+      await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+    } catch (error) {
+      console.log('Failed to save articles', error);
+    }
+  };
+
+  const handleAddLink = async () => {
+    if (!linkInputValue.trim()) return;
+
+    try {
+      const pageTitle = await fetchPageTitle(linkInputValue.trim());
+
+      const newArticle: Article = {
+        id: Date.now().toString(),
+        title: pageTitle || 'Untitled Article',
+        url: linkInputValue.trim(),
+        dateAdded: new Date().toISOString(),
+      };
+
+      const updatedArticles = [...articles, newArticle];
+      setArticles(updatedArticles);
+      await saveArticles(updatedArticles);
+
+      setLinkInputValue('');
+      setShowInput(false);
+    } catch (error) {
+      console.log('Error adding article:', error);
+    }
   };
 
   const renderItem = ({ item }: { item: Article }) => (
@@ -36,9 +90,6 @@ export default function DashboardScreen() {
       <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
         {item.title}
       </Text>
-      <Text style={[styles.articleSummary, { color: isDarkMode ? '#aaa' : '#666' }]}>
-        {item.summary}
-      </Text>
     </TouchableOpacity>
   );
 
@@ -51,6 +102,7 @@ export default function DashboardScreen() {
         <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>
           {articles.length} Articles Saved
         </Text>
+
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
@@ -60,13 +112,50 @@ export default function DashboardScreen() {
               {gridView ? 'List View' : 'Grid View'}
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
-            onPress={() => console.log('Add button pressed')}
+            onPress={() => setShowInput(!showInput)}
           >
-            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Add</Text>
+            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
+              Add
+            </Text>
           </TouchableOpacity>
         </View>
+
+        {showInput && (
+          <View style={{ marginTop: 10 }}>
+            <TextInput
+              value={linkInputValue}
+              onChangeText={setLinkInputValue}
+              placeholder="Paste link here"
+              placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
+              style={[
+                {
+                  borderColor: isDarkMode ? '#444' : '#ccc',
+                  borderWidth: 1,
+                  padding: 10,
+                  borderRadius: 8,
+                  color: isDarkMode ? '#fff' : '#000',
+                },
+              ]}
+            />
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                {
+                  marginTop: 10,
+                  backgroundColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
+              onPress={handleAddLink}
+            >
+              <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
+                Save Link
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <FlatList
