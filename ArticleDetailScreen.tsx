@@ -14,6 +14,8 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { format } from 'date-fns';
+
 
 type ArticleDetailProps = NativeStackScreenProps<RootStackParamList, 'ArticleDetail'>;
 
@@ -55,8 +57,10 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     >
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>{article.title}</Text>
-        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>{article.id}</Text>
-        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>{article.dateAdded}</Text>
+        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>ID: {article.id}</Text>
+        <Text style={[styles.summary, { color: isDarkMode ? '#fff' : '#000' }]}>Added On:{' '}
+          {article.dateAdded ? format(new Date(article.dateAdded), 'dd-MM-yyyy h:mm a') : 'N/A'}
+        </Text>
 
         <TouchableOpacity
           onPress={() => Linking.openURL(article.url)}

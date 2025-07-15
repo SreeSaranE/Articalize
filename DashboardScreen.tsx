@@ -68,9 +68,14 @@ export default function DashboardScreen() {
     try {
       const pageTitle = await fetchPageTitle(linkInputValue.trim());
 
+      const limitedTitle = (pageTitle || 'Untitled Article')
+      .split(' ')
+      .slice(0, 10)
+      .join(' ');
+
       const newArticle: Article = {
         id: Date.now().toString(),
-        title: pageTitle || 'Untitled Article',
+        title: limitedTitle || 'Untitled Article',
         url: linkInputValue.trim(),
         dateAdded: new Date().toISOString(),
       };
