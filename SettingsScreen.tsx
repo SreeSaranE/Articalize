@@ -58,8 +58,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#111' : '#fff' }}>
-      <View
+    <SafeAreaView
         style={[
           styles.container,
           { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
@@ -101,7 +100,6 @@ export default function SettingsScreen() {
             Version 1.0.0
           </Text>
         </View>
-      </View>
     </SafeAreaView>
   );
 }

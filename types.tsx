@@ -4,6 +4,7 @@ export type RootStackParamList = {
   Home: undefined;
   ArticleDetail: { article: Article };
   PrivacyPolicy: undefined;
+  CollectionDetail: { collection: Collection };
 };
 
 export type Article = {
@@ -11,4 +12,10 @@ export type Article = {
   title: string;
   url: string;
   dateAdded?: string;
+};
+
+export type Collection = {
+  id: string;
+  name: string;
+  articles: Article[];
 };
