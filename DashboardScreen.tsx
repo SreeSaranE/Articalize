@@ -14,6 +14,8 @@ import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-naviga
 import { RootStackParamList, Article } from './types';
 import { fetchPageTitle } from './fetchPageTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 type DashboardScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -30,6 +32,12 @@ export default function DashboardScreen() {
   useEffect(() => {
     loadArticles();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadArticles();
+    }, [])
+  );
 
   const handlePress = (item: Article) => {
     navigation.navigate('ArticleDetail', { article: item });

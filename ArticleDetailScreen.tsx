@@ -30,12 +30,14 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   const handleDelete = async () => {
     try {
       const stored = await AsyncStorage.getItem('articles');
-      if (stored) {
-        const articles = JSON.parse(stored);
-        const updatedArticles = articles.filter((a: Article) => a.id !== article.id);
-        await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
-        navigation.goBack();
-      }
+      const articles: Article[] = stored ? JSON.parse(stored) : [];
+
+      const updatedArticles = articles.filter(a => a.id !== article.id);
+
+      await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+
+      navigation.goBack();
+      
     } catch (error) {
       console.log('Error deleting article:', error);
     }

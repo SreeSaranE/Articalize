@@ -2,7 +2,7 @@ export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Home: undefined;
-  ArticleDetail: { article: { title: string; url: string, id?: string, dateAdded?: string } };
+  ArticleDetail: { article: Article };
   PrivacyPolicy: undefined;
 };
 
