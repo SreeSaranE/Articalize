@@ -45,12 +45,12 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 
 ### 🗺️ Roadmap
 
-* [-] Save article cards
-* [-] Tag and organize
+* [.] Save article cards
+* [.] Tag and organize
 * [ ] Add browser extension
 * [ ] AI summarization
 * [ ] Mobile app support
-* [-] Dark mode
+* [.] Dark mode
 
 ---
 
