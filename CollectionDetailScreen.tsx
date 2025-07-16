@@ -14,12 +14,14 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { RootStackParamList, Collection, Article } from './types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type CollectionDetailRouteProp = RouteProp<RootStackParamList, 'CollectionDetail'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CollectionDetailScreen() {
   const route = useRoute<CollectionDetailRouteProp>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const isDarkMode = useColorScheme() === 'dark';
 
   const { collection } = route.params;
@@ -56,7 +58,10 @@ export default function CollectionDetailScreen() {
   };
 
   const renderArticle = ({ item }: { item: Article }) => (
-    <View style={styles.articleRow}>
+    <TouchableOpacity
+      onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+      style={styles.articleRow}
+    >
       <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
         {item.title}
       </Text>
@@ -72,7 +77,7 @@ export default function CollectionDetailScreen() {
           Remove
         </Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

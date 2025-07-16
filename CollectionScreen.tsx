@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   FlatList,
+  TouchableOpacity,
+  TextInput,
   StyleSheet,
   useColorScheme,
   SafeAreaView,
   Platform,
   StatusBar,
-  Modal,
-  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -18,13 +17,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Collection } from './types';
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function CollectionsScreen() {
+export default function CollectionScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const isDarkMode = useColorScheme() === 'dark';
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newCollectionName, setNewCollectionName] = useState('');
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [showInput, setShowInput] = useState(false);
 
   useEffect(() => {
     loadCollections();
@@ -41,9 +40,11 @@ export default function CollectionsScreen() {
       const stored = await AsyncStorage.getItem('collections');
       if (stored) {
         setCollections(JSON.parse(stored));
+      } else {
+        setCollections([]);
       }
     } catch (error) {
-      console.log('Failed to load collections:', error);
+      console.log('Failed to load collections', error);
     }
   };
 
@@ -51,11 +52,11 @@ export default function CollectionsScreen() {
     try {
       await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
     } catch (error) {
-      console.log('Failed to save collections:', error);
+      console.log('Failed to save collections', error);
     }
   };
 
-  const handleCreateCollection = () => {
+  const handleAddCollection = async () => {
     if (!newCollectionName.trim()) return;
 
     const newCollection: Collection = {
@@ -64,93 +65,79 @@ export default function CollectionsScreen() {
       articles: [],
     };
 
-    const updated = [...collections, newCollection];
-    setCollections(updated);
-    saveCollections(updated);
+    const updatedCollections = [...collections, newCollection];
+    setCollections(updatedCollections);
+    await saveCollections(updatedCollections);
 
     setNewCollectionName('');
-    setShowCreateModal(false);
+    setShowInput(false);
   };
 
   const handleCollectionPress = (collection: Collection) => {
     navigation.navigate('CollectionDetail', { collection });
   };
 
-  const renderItem = ({ item }: { item: Collection }) => (
+  const renderCollection = ({ item }: { item: Collection }) => (
     <TouchableOpacity
-      style={[styles.collectionItem, { backgroundColor: isDarkMode ? '#222' : '#fff' }]}
       onPress={() => handleCollectionPress(item)}
+      style={[styles.collectionItem]}
     >
-      <Text style={[styles.collectionText, { color: isDarkMode ? '#f5f5f5' : '#000' }]}>
+      <Text style={[styles.collectionName, { color: isDarkMode ? '#fff' : '#000' }]}>
         {item.name}
       </Text>
-      <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>
+      <Text style={{ color: isDarkMode ? '#aaa' : '#555' }}>
         {item.articles.length} Articles
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#111' : '#f5f5f5' }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
       <View style={styles.container}>
-        <Text style={[styles.collectionTitle, { color: isDarkMode ? '#f5f5f5' : '#000' }]}>
-          Collection
+        <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>Collections</Text>
+        <Text style={{ color: isDarkMode ? '#aaa' : '#555' }}>
+          {collections.length} Collections Saved
         </Text>
+
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+            onPress={() => setShowInput(!showInput)}
+          >
+            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Add Collection</Text>
+          </TouchableOpacity>
+        </View>
+
+        {showInput && (
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={newCollectionName}
+              onChangeText={setNewCollectionName}
+              placeholder="Collection name"
+              placeholderTextColor={isDarkMode ? '#888' : '#999'}
+              style={[
+                styles.input,
+                { color: isDarkMode ? '#fff' : '#000', borderColor: isDarkMode ? '#555' : '#ccc' },
+              ]}
+            />
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+              onPress={handleAddCollection}
+            >
+              <Text style={{ color: '#fff' }}>Save Collection</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <FlatList
           data={collections}
           keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          renderItem={renderCollection}
+          contentContainerStyle={{ paddingVertical: 10 }}
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 1, backgroundColor: isDarkMode ? '#333' : '#ddd' }} />
+          )}
         />
-
-        <TouchableOpacity
-          style={[
-            styles.createButton,
-            { backgroundColor: isDarkMode ? '#2d2d2e' : '#fff' },
-          ]}
-          onPress={() => setShowCreateModal(true)}
-        >
-          <Text style={[styles.createButtonText, {color: isDarkMode ? '#f5f5f5' : '#2d2d2e'} ]}>
-            Create New Collection</Text>
-        </TouchableOpacity>
-
-        <Modal visible={showCreateModal} transparent animationType="slide">
-          <View style={[styles.modalContainer]}>
-            <View style={[styles.modalContent,
-              { backgroundColor: isDarkMode ? '#2d2d2e' : '#f5f5f5' },
-              ]}>
-              <TextInput
-                placeholder="Enter Collection Name"
-                value={newCollectionName}
-                onChangeText={setNewCollectionName}
-                style={[styles.input]}
-              />
-              <TouchableOpacity
-                onPress={handleCreateCollection}
-                style={[
-                  styles.createButton,
-                  { backgroundColor: isDarkMode ? '#4A90E2' : '#607D8B' },
-                ]}
-              >
-                <Text style={styles.createButtonText}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setShowCreateModal(false)}
-                style={styles.cancelButton}
-              >
-                <Text
-                  style={[
-                    styles.cancelButtonText,
-                    { color: isDarkMode ? '#4A90E2' : '#607D8B' },
-                  ]}
-                >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -165,57 +152,36 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  collectionTitle: {
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 25,
+    marginBottom: 10,
   },
-  listContent: {
-    paddingBottom: 20,
+  buttons: {
+    flexDirection: 'row',
+    marginVertical: 10,
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   collectionItem: {
     padding: 16,
     borderRadius: 8,
-    marginBottom: 10,
   },
-  collectionText: {
+  collectionName: {
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-  createButton: {
-    padding: 12,
-    marginVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  createButtonText: {
-    color: '#f5f5f5',
-    fontWeight: 'bold',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-    margin: 20,
-    borderRadius: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  cancelButton: {
-    marginTop: 10,
-    padding: 10,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
     fontWeight: 'bold',
   },
 });
