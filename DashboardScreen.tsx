@@ -102,10 +102,10 @@ export default function DashboardScreen() {
 
         <View style={styles.headerButtons}>
           <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+            style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
             onPress={() => setShowInput(!showInput)}
           >
-            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Add Link</Text>
+            <Text style={{ color:'#fff'}}>Add Link</Text>
           </TouchableOpacity>
         </View>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,15 @@ import {
   useColorScheme,
   Image,
   Alert,
+  TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,13 +27,58 @@ export default function SettingsScreen() {
   const isDarkMode = colorScheme === 'dark';
   const navigation = useNavigation<NavigationProp>();
 
+  const [username, setUsername] = useState('USER0');
+  const [profileUri, setProfileUri] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const storedName = await AsyncStorage.getItem('username');
+      const storedUri = await AsyncStorage.getItem('profileUri');
+      if (storedName) setUsername(storedName);
+      if (storedUri) setProfileUri(storedUri);
+    };
+    loadData();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await AsyncStorage.setItem('username', username);
+      if (profileUri) await AsyncStorage.setItem('profileUri', profileUri);
+      setIsEditing(false);
+      Alert.alert('Profile updated');
+    } catch (e) {
+      console.error('Save error:', e);
+      Alert.alert('Error saving profile');
+    }
+  };
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required to access photos.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      setProfileUri(result.assets[0].uri);
+      setIsEditing(true);
+    }
+  };
+
   const handleExportData = async () => {
     try {
       const data = {
-        username: 'SREESARAN E',
-        articles: [], // Add real app data here
+        username,
+        profileUri,
+        articles: [],
       };
-
       const json = JSON.stringify(data, null, 2);
       const fileUri = FileSystem.documentDirectory + 'data-export.json';
       await FileSystem.writeAsStringAsync(fileUri, json);
@@ -69,10 +117,48 @@ export default function SettingsScreen() {
       </Text>
 
       <View style={styles.profileContainer}>
-        <Image source={require('./assets/dp.jpg')} style={styles.profileImage} />
-        <Text style={[styles.username, { color: isDarkMode ? '#fff' : '#000' }]}>
-          SREESARAN E
-        </Text>
+        <TouchableOpacity onPress={handlePickImage}>
+          <Image
+            source={
+              profileUri ? { uri: profileUri } : require('./assets/icon.png')
+            }
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+
+        {isEditing ? (
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
+            style={[
+              styles.usernameInput,
+              {
+                color: isDarkMode ? '#fff' : '#000',
+                borderColor: isDarkMode ? '#555' : '#ccc',
+              },
+            ]}
+          />
+        ) : (
+          <Text style={[styles.username, { color: isDarkMode ? '#fff' : '#000' }]}>
+            {username}
+          </Text>
+        )}
+
+        {isEditing ? (
+          <TouchableOpacity
+            onPress={handleSave}
+            style={[styles.editButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
+          >
+            <Text style={{ color: '#fff', fontWeight: '600' }}>Save</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => setIsEditing(true)}
+            style={[styles.editButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
+          >
+            <Text style={{ color: '#fff', fontWeight: '600' }}>Edit</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
@@ -125,6 +211,20 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 18,
     fontWeight: '600',
+    marginBottom: 10,
+  },
+  usernameInput: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    width: '60%',
+    textAlign: 'center',
+  },
+  editButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
   },
   settingItem: {
     paddingVertical: 16,

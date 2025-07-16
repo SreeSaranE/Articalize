@@ -101,10 +101,10 @@ export default function CollectionScreen() {
 
         <View style={styles.buttons}>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+            style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
             onPress={() => setShowInput(!showInput)}
           >
-            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Add Collection</Text>
+            <Text style={{ color:'#fff'}}>Add Collection</Text>
           </TouchableOpacity>
         </View>
 

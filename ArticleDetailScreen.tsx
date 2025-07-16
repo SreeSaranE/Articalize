@@ -51,7 +51,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
 
         <TouchableOpacity
           onPress={() => Linking.openURL(article.url)}
-          style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
+          style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
         >
           <Text style={styles.buttonText}>Open in Browser</Text>
         </TouchableOpacity>
@@ -66,7 +66,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: isDarkMode ? '#333' : '#E53935' }]}
+          style={[styles.footerButton, { backgroundColor:'#E53935' }]}
           onPress={handleDelete}
         >
           <Text style={styles.footerButtonText}>Delete</Text>
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    marginBottom: 10
   },
   content: {
     padding: 20,
