@@ -31,10 +31,10 @@ export default function CollectionsScreen() {
   }, []);
 
   useFocusEffect(
-      React.useCallback(() => {
-        loadCollections();
-      }, [])
-    );
+    React.useCallback(() => {
+      loadCollections();
+    }, [])
+  );
 
   const loadCollections = async () => {
     try {
@@ -93,7 +93,9 @@ export default function CollectionsScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#111' : '#f5f5f5' }]}>
       <View style={styles.container}>
-        <Text style={[styles.collectionTitle, { color: isDarkMode ? '#f5f5f5' : '#000' }]}>Collection</Text>
+        <Text style={[styles.collectionTitle, { color: isDarkMode ? '#f5f5f5' : '#000' }]}>
+          Collection
+        </Text>
 
         <FlatList
           data={collections}
@@ -103,26 +105,48 @@ export default function CollectionsScreen() {
         />
 
         <TouchableOpacity
-          style={styles.createButton}
+          style={[
+            styles.createButton,
+            { backgroundColor: isDarkMode ? '#2d2d2e' : '#fff' },
+          ]}
           onPress={() => setShowCreateModal(true)}
         >
-          <Text style={styles.createButtonText}>Create New Collection</Text>
+          <Text style={[styles.createButtonText, {color: isDarkMode ? '#f5f5f5' : '#2d2d2e'} ]}>
+            Create New Collection</Text>
         </TouchableOpacity>
 
         <Modal visible={showCreateModal} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+          <View style={[styles.modalContainer]}>
+            <View style={[styles.modalContent,
+              { backgroundColor: isDarkMode ? '#2d2d2e' : '#f5f5f5' },
+              ]}>
               <TextInput
                 placeholder="Enter Collection Name"
                 value={newCollectionName}
                 onChangeText={setNewCollectionName}
-                style={styles.input}
+                style={[styles.input]}
               />
-              <TouchableOpacity onPress={handleCreateCollection} style={styles.createButton}>
+              <TouchableOpacity
+                onPress={handleCreateCollection}
+                style={[
+                  styles.createButton,
+                  { backgroundColor: isDarkMode ? '#4A90E2' : '#607D8B' },
+                ]}
+              >
                 <Text style={styles.createButtonText}>Save</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowCreateModal(false)} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+              <TouchableOpacity
+                onPress={() => setShowCreateModal(false)}
+                style={styles.cancelButton}
+              >
+                <Text
+                  style={[
+                    styles.cancelButtonText,
+                    { color: isDarkMode ? '#4A90E2' : '#607D8B' },
+                  ]}
+                >
+                  Cancel
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -159,7 +183,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   createButton: {
-    backgroundColor: '#007AFF',
     padding: 12,
     marginVertical: 10,
     borderRadius: 8,
@@ -193,6 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#007AFF',
+    fontWeight: 'bold',
   },
 });

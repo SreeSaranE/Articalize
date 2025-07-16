@@ -23,11 +23,16 @@ export default function CollectionDetailScreen() {
   const isDarkMode = useColorScheme() === 'dark';
 
   const { collection } = route.params;
-  const [articles, setArticles] = useState<Article[]>(collection.articles);
+  const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     navigation.setOptions({ title: collection.name });
-  }, [collection.name]);
+
+    const sortedArticles = [...collection.articles].sort((a, b) =>
+      a.title.localeCompare(b.title)
+    );
+    setArticles(sortedArticles);
+  }, [collection]);
 
   const handleRemoveArticle = async (articleId: string) => {
     const updatedArticles = articles.filter(a => a.id !== articleId);
@@ -38,7 +43,10 @@ export default function CollectionDetailScreen() {
       const collections: Collection[] = JSON.parse(stored);
       const updatedCollections = collections.map(col => {
         if (col.id === collection.id) {
-          return { ...col, articles: updatedArticles };
+          const sortedUpdatedArticles = [...updatedArticles].sort((a, b) =>
+            a.title.localeCompare(b.title)
+          );
+          return { ...col, articles: sortedUpdatedArticles };
         }
         return col;
       });
@@ -48,7 +56,7 @@ export default function CollectionDetailScreen() {
   };
 
   const renderArticle = ({ item }: { item: Article }) => (
-    <View style={[styles.articleItem, { backgroundColor: isDarkMode ? '#222' : '#fff' }]}>
+    <View style={styles.articleRow}>
       <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
         {item.title}
       </Text>
@@ -60,13 +68,15 @@ export default function CollectionDetailScreen() {
           ])
         }
       >
-        <Text style={styles.removeButton}>Remove</Text>
+        <Text style={[styles.removeButton, { color: isDarkMode ? '#ff6b6b' : '#cc0000' }]}>
+          Remove
+        </Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#111' : '#fff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000' : '#fff' }}>
       <View
         style={[
           styles.container,
@@ -74,7 +84,7 @@ export default function CollectionDetailScreen() {
         ]}
       >
         {articles.length === 0 ? (
-          <Text style={[styles.emptyText, { color: isDarkMode ? '#ccc' : '#333' }]}>
+          <Text style={[styles.emptyText, { color: isDarkMode ? '#888' : '#555' }]}>
             No articles in this collection yet.
           </Text>
         ) : (
@@ -82,7 +92,10 @@ export default function CollectionDetailScreen() {
             data={articles}
             keyExtractor={(item) => item.id}
             renderItem={renderArticle}
-            contentContainerStyle={{ padding: 10 }}
+            contentContainerStyle={{ paddingVertical: 10 }}
+            ItemSeparatorComponent={() => (
+              <View style={{ height: 1, backgroundColor: isDarkMode ? '#333' : '#ddd' }} />
+            )}
           />
         )}
       </View>
@@ -95,22 +108,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  articleItem: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 10,
+  articleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
   },
   articleTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    flexShrink: 1,
+    marginRight: 18,
+    marginTop: 5,
   },
   removeButton: {
-    marginTop: 8,
-    color: 'red',
+    fontSize: 14,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 20,
-    fontSize: 16,
+    fontSize: 17,
   },
 });
