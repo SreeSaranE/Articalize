@@ -1,5 +1,3 @@
-// DashboardScreen.tsx (Refactored for uniform list style)
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -17,7 +15,7 @@ import { sampleArticles } from './articles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
-import { fetchPageTitle } from './fetchPageTitle';
+import { fetchPageTitle, fetchPageContent } from './fetchPageTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -62,13 +60,17 @@ export default function DashboardScreen() {
     if (!linkInputValue.trim()) return;
 
     try {
-      const pageTitle = await fetchPageTitle(linkInputValue.trim());
+      const url = linkInputValue.trim();
+      const pageTitle = await fetchPageTitle(url);
+      const pageContent = await fetchPageContent(url);
 
       const newArticle: Article = {
         id: Date.now().toString(),
         title: (pageTitle || 'Untitled Article').split(' ').slice(0, 10).join(' '),
-        url: linkInputValue.trim(),
+        url: url,
         dateAdded: new Date().toISOString(),
+        content: pageContent || '', // Make sure Article type includes content
+        tags: [],
       };
 
       const updatedArticles = [...articles, newArticle];

@@ -3,6 +3,7 @@ export type Article = {
   title: string;
   url: string;
   dateAdded?: string;
+  content?: string;
 };
 
 export const sampleArticles: Article[] = [

@@ -13,6 +13,9 @@ export type Article = {
   title: string;
   url: string;
   dateAdded?: string;
+  content?: string;
+  tags?: string[];
+  readingTime?: number;
 };
 
 export type Collection = {

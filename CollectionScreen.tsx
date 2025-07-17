@@ -182,6 +182,5 @@ const styles = StyleSheet.create({
   },
   collectionName: {
     fontSize: 18,
-    fontWeight: 'bold',
   },
 });
