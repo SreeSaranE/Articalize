@@ -78,13 +78,37 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     try {
       const stored = await AsyncStorage.getItem('articles');
       const articles: Article[] = stored ? JSON.parse(stored) : [];
+
+      // Remove from articles
       const updatedArticles = articles.filter(a => a.id !== article.id);
       await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+
+      // Clean up collections properly
+      const collectionsRaw = await AsyncStorage.getItem('collections');
+      if (collectionsRaw) {
+        const collections = JSON.parse(collectionsRaw);
+
+        const updatedCollections = collections.map((collection: any) => {
+          const cleanedArticles = collection.articles.filter((a: any) => {
+            return updatedArticles.some(updated => updated.id === a.id);
+          });
+
+          return {
+            ...collection,
+            articles: cleanedArticles,
+          };
+        });
+
+        await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
+      }
+
       navigation.goBack();
     } catch (error) {
       console.error('Error deleting article:', error);
     }
   };
+
+
 
   const handleShare = async () => {
     try {

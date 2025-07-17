@@ -34,6 +34,7 @@ export default function DashboardScreen() {
   useFocusEffect(
     React.useCallback(() => {
       loadArticles();
+      cleanUpCollections();
     }, [])
   );
 
@@ -53,6 +54,34 @@ export default function DashboardScreen() {
       await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
     } catch (error) {
       console.log('Failed to save articles', error);
+    }
+  };
+
+  const cleanUpCollections = async () => {
+    try {
+      const storedArticles = await AsyncStorage.getItem('articles');
+      const articles: Article[] = storedArticles ? JSON.parse(storedArticles) : [];
+
+      const storedCollections = await AsyncStorage.getItem('collections');
+      if (storedCollections) {
+        const collections = JSON.parse(storedCollections);
+
+        const updatedCollections = collections.map((collection: any) => {
+          const cleanedArticles = collection.articles.filter((a: any) =>
+            articles.some(existing => existing.id === a.id)
+          );
+
+          return {
+            ...collection,
+            articles: cleanedArticles,
+          };
+        });
+
+        await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
+        console.log('Collections cleaned up successfully.');
+      }
+    } catch (error) {
+      console.error('Error cleaning collections:', error);
     }
   };
 
