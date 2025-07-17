@@ -9,7 +9,7 @@ import {
   Platform,
   StatusBar,
   useColorScheme,
-  Alert
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
@@ -55,6 +55,29 @@ export default function CollectionDetailScreen() {
 
       await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
     }
+  };
+
+  const handleDeleteCollection = async () => {
+    Alert.alert(
+      'Delete Collection',
+      'Are you sure you want to delete this collection?',
+      [
+        { text: 'Cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const stored = await AsyncStorage.getItem('collections');
+            if (stored) {
+              const collections: Collection[] = JSON.parse(stored);
+              const updatedCollections = collections.filter(col => col.id !== collection.id);
+              await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
+              navigation.goBack();
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderArticle = ({ item }: { item: Article }) => (
@@ -103,6 +126,10 @@ export default function CollectionDetailScreen() {
             )}
           />
         )}
+
+        <TouchableOpacity onPress={handleDeleteCollection} style={styles.deleteCollectionButton}>
+          <Text style={styles.deleteCollectionText}>Delete Collection</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -132,5 +159,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontSize: 17,
+  },
+  deleteCollectionButton: {
+    marginTop: 20,
+    marginBottom: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  deleteCollectionText: {
+    color: '#cc0000',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
