@@ -18,6 +18,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
+import { Ionicons } from '@expo/vector-icons'; // Tick icon
 
 type ArticleDetailProps = NativeStackScreenProps<RootStackParamList, 'ArticleDetail'>;
 
@@ -27,31 +28,18 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   const isDarkMode = colorScheme === 'dark';
 
   const [title, setTitle] = useState(article.title);
-  const [tags, setTags] = useState(Array.isArray(article.tags) ? article.tags.join(", ") : "");
   const [readingTime, setReadingTime] = useState(0);
 
   useEffect(() => {
-    console.log('Loaded article:', article);
     estimateReadingTime(article.content || '');
-
-    const runCleanup = async () => {
-      await cleanUpArticles();
-    };
-
-    runCleanup();
+    cleanUpArticles();
   }, [article.content]);
 
-  
   const estimateReadingTime = (content: string) => {
-    if (!content) {
-      setReadingTime(0);
-      return;
-    }
     const wordsPerMinute = 200;
-    const words = content.split(/\s+/).length;
+    const words = content ? content.split(/\s+/).length : 0;
     setReadingTime(Math.ceil(words / wordsPerMinute));
   };
-
 
   const handleSaveMetadata = async () => {
     try {
@@ -60,13 +48,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
 
       const updatedArticles = articles.map((a) =>
         a.id === article.id
-          ? {
-              ...a,
-              title: title.trim(),
-              tags: tags
-                ? tags.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0)
-                : [],
-            }
+          ? { ...a, title: title.trim() }
           : a
       );
 
@@ -76,7 +58,6 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
       console.error('Error saving metadata:', error);
     }
   };
-
 
   const cleanUpArticles = async () => {
     const stored = await AsyncStorage.getItem('articles');
@@ -90,7 +71,6 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
           : [],
       }));
       await AsyncStorage.setItem('articles', JSON.stringify(articles));
-      console.log('Articles cleaned up.');
     }
   };
 
@@ -116,24 +96,33 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     }
   };
 
+  const titleChanged = title.trim() !== article.title.trim();
+
   return (
-    <SafeAreaView
-      style={[
-        styles.safeArea,
-        { backgroundColor: isDarkMode ? '#000' : '#fff' },
-      ]}
-    >
-      <ScrollView contentContainerStyle={[styles.content, { flexGrow: 1 }]}>
-        <TextInput
-          style={[
-            styles.titleInput,
-            { color: isDarkMode ? '#fff' : '#000', borderColor: isDarkMode ? '#555' : '#ccc' },
-          ]}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Article Title"
-          placeholderTextColor={isDarkMode ? '#555' : '#999'}
-        />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.titleRow}>
+          <TextInput
+            style={[
+              styles.titleInput,
+              {
+                color: isDarkMode ? '#fff' : '#000',
+                borderColor: isDarkMode ? '#555' : '#ccc',
+              },
+            ]}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Article Title"
+            placeholderTextColor={isDarkMode ? '#555' : '#999'}
+            multiline
+            textAlignVertical="top"
+          />
+          {titleChanged && (
+            <TouchableOpacity onPress={handleSaveMetadata} style={styles.tickButton}>
+              <Ionicons name="checkmark" size={24} color="#4CAF50" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <Text style={[styles.metaText, { color: isDarkMode ? '#aaa' : '#555' }]}>
           ID: {article.id}
@@ -147,55 +136,22 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
           Reading Time: {article.content ? (readingTime > 0 ? `${readingTime} min` : 'Less than 1 min') : 'Content missing'}
         </Text>
 
-
-        <TextInput
-          style={[
-            styles.tagInput,
-            { color: isDarkMode ? '#fff' : '#000', borderColor: isDarkMode ? '#555' : '#ccc' },
-          ]}
-          value={tags}
-          onChangeText={setTags}
-          placeholder="Tags (comma separated)"
-          placeholderTextColor={isDarkMode ? '#555' : '#999'}
-        />
-
-        <TouchableOpacity
-          onPress={() => Linking.openURL(article.url)}
-          style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
-        >
-          <Text style={styles.buttonText}>Open in Browser</Text>
+        <TouchableOpacity onPress={() => Linking.openURL(article.url)}>
+          <Text style={[styles.actionText, { color: '#4F46E5' }]}>Open in Browser</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleSaveMetadata}
-          style={[styles.button, { backgroundColor: isDarkMode ? '#555' : '#4CAF50' }]}
-        >
-          <Text style={styles.buttonText}>Save Metadata</Text>
+        <TouchableOpacity onPress={handleShare}>
+          <Text style={[styles.actionText, { color: '#2196F3' }]}>Share Article</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleShare}
-          style={[styles.button, { backgroundColor: isDarkMode ? '#333' : '#2196F3' }]}
-        >
-          <Text style={styles.buttonText}>Share Article</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('AddToCollection', { article })}>
+          <Text style={[styles.actionText, { color: '#FF9800' }]}>Add to Collection</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleDelete}>
+          <Text style={[styles.actionText, { color: '#E53935' }]}>Delete</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      <View style={[styles.footer, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
-        <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
-          onPress={() => navigation.navigate('AddToCollection', { article })}
-        >
-          <Text style={styles.footerButtonText}>Add to Collection</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: '#E53935' }]}
-          onPress={handleDelete}
-        >
-          <Text style={styles.footerButtonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -208,48 +164,29 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   titleInput: {
+    flex: 1,
     fontSize: 24,
     fontWeight: 'bold',
     borderBottomWidth: 1,
-    marginBottom: 16,
+    minHeight: 60,
+    paddingRight: 12,
+  },
+  tickButton: {
+    padding: 6,
   },
   metaText: {
     fontSize: 14,
     marginBottom: 8,
+    marginTop: 10,
   },
-  tagInput: {
+  actionText: {
     fontSize: 16,
-    borderBottomWidth: 1,
-    marginBottom: 20,
-  },
-  button: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  buttonText: {
-    color: '#fff',
     fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: 16,
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-  },
-  footerButton: {
-    flex: 1,
-    paddingVertical: 14,
-    marginHorizontal: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  footerButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    marginVertical: 12,
   },
 });
