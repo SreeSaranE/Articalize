@@ -1,12 +1,11 @@
 export type RootStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
   Home: undefined;
   ArticleDetail: { article: Article };
   PrivacyPolicy: undefined;
   CollectionDetail: { collection: Collection };
   AddToCollection: { article: Article };
 };
+
 
 export type Article = {
   id: string;

@@ -94,10 +94,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleSignOut = () => {
-    navigation.replace('Login');
-  };
-
   const handlePrivacyPolicy = () => {
     navigation.navigate('PrivacyPolicy');
   };
@@ -167,12 +163,6 @@ export default function SettingsScreen() {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
-        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
-          Sign Out
-        </Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
         <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
           Privacy Policy
@@ -181,7 +171,7 @@ export default function SettingsScreen() {
 
       <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
         <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>
-          Version 1.0.0
+          Version 2.0.0
         </Text>
       </View>
     </SafeAreaView>

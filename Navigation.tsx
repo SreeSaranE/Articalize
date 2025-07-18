@@ -19,7 +19,7 @@ export default function Navigation() {
   return (
     <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="Home"
         screenOptions={{
           headerShown: false,
           contentStyle: {
@@ -27,8 +27,9 @@ export default function Navigation() {
           },
         }}
       >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
+    {/*   <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      */}
         <Stack.Screen name="Home" component={BottomTabsNavigation} />
         <Stack.Screen name="ArticleDetail" component={ArticleDetailScreen} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
