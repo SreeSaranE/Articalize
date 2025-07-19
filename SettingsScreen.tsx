@@ -122,8 +122,6 @@ export default function SettingsScreen() {
         },
       ]}
     >
-      <Text style={[styles.headerText, { color: isDarkMode ? '#fff' : '#000' }]}>Settings</Text>
-
       <View style={styles.profileContainer}>
         <TextInput
           value={username}
@@ -140,7 +138,7 @@ export default function SettingsScreen() {
         {username !== originalUsername && (
           <TouchableOpacity
             onPress={handleSave}
-            style={[styles.editButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
+            style={[styles.saveButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
           >
             <Text style={{ color: '#fff', fontWeight: '600' }}>Save</Text>
           </TouchableOpacity>
@@ -171,25 +169,21 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 25,
-  },
   profileContainer: {
     alignItems: 'center',
     marginBottom: 30,
+    marginTop: 10,
   },
   usernameInput: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
     marginBottom: 10,
     borderBottomWidth: 1,
-    width: '60%',
+    width: '70%',
     textAlign: 'center',
   },
-  editButton: {
-    paddingVertical: 10,
+  saveButton: {
+    paddingVertical: 8,
     paddingHorizontal: 20,
     borderRadius: 8,
   },

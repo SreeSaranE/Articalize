@@ -26,8 +26,8 @@ export default function PrivacyPolicyScreen() {
         ]}
       >
         {/* Replace this with your actual privacy policy text */}
-        The entire code is poen to everyone and no restiction to use or modify it.
-        if possible just fork this app 
+        The entire code is open to everyone and no restiction to use or modify it.{"\n"}{"\n"}
+        If possible just fork this repo.
       </Text>
     </ScrollView>
   );

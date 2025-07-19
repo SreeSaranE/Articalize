@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,18 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { sampleArticles } from './articles';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
-import { fetchPageTitle} from './fetchPageTitle';
+import { fetchPageTitle } from './fetchPageTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+// @ts-ignore
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -26,6 +30,8 @@ export default function DashboardScreen() {
   const [articles, setArticles] = useState<Article[]>(sampleArticles);
   const [linkInputValue, setLinkInputValue] = useState('');
   const [showInput, setShowInput] = useState(false);
+
+  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     loadArticles();
@@ -78,7 +84,6 @@ export default function DashboardScreen() {
         });
 
         await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
-        console.log('Collections cleaned up successfully.');
       }
     } catch (error) {
       console.error('Error cleaning collections:', error);
@@ -105,11 +110,22 @@ export default function DashboardScreen() {
 
       setLinkInputValue('');
       setShowInput(false);
+      Keyboard.dismiss();
     } catch (error) {
       console.log('Error adding article:', error);
     }
   };
 
+  const handleToggleInput = () => {
+    if (showInput) {
+      setShowInput(false);
+      setLinkInputValue('');
+      Keyboard.dismiss();
+    } else {
+      setShowInput(true);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  };
 
   const handlePress = (item: Article) => {
     navigation.navigate('ArticleDetail', { article: item });
@@ -124,49 +140,57 @@ export default function DashboardScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000' : '#fff' }}>
-      <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
-        <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>Dashboard</Text>
-        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>{articles.length} Articles Saved</Text>
-
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
-            onPress={() => setShowInput(!showInput)}
-          >
-            <Text style={{ color:'#fff'}}>Add Link</Text>
-          </TouchableOpacity>
-        </View>
-
-        {showInput && (
-          <View style={{ marginTop: 10 }}>
-            <TextInput
-              value={linkInputValue}
-              onChangeText={setLinkInputValue}
-              placeholder="Paste link here"
-              placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
-              style={[styles.input, { color: isDarkMode ? '#fff' : '#000' }]}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000' : '#fff' }}>
+          <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+            <FlatList
+              data={articles}
+              keyExtractor={(item) => item.id}
+              renderItem={renderArticle}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              ItemSeparatorComponent={() => (
+                <View style={{ height: 1, backgroundColor: isDarkMode ? '#333' : '#ddd' }} />
+              )}
             />
-            <TouchableOpacity
-              style={[styles.headerButton, { marginTop: 10, backgroundColor: isDarkMode ? '#333' : '#ddd' }]}
-              onPress={handleAddLink}
-            >
-              <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Save Link</Text>
+          </View>
+
+          {/* Input Field Above Bottom Bar */}
+          {showInput && (
+            <View style={[styles.inputWrapper, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+              <TextInput
+                ref={inputRef}
+                value={linkInputValue}
+                onChangeText={setLinkInputValue}
+                placeholder="Paste link here"
+                placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
+                style={[styles.input, { color: isDarkMode ? '#fff' : '#000' }]}
+                onSubmitEditing={handleAddLink}
+                returnKeyType="done"
+              />
+            </View>
+          )}
+
+          {/* Bottom Info + Action */}
+          <View style={styles.bottomBar}>
+            <Text style={{ fontSize: 15, color: isDarkMode ? '#ccc' : '#333', fontWeight: '600' }}>
+              Articles: {articles.length}
+            </Text>
+
+            <TouchableOpacity onPress={showInput ? handleAddLink : handleToggleInput} style={styles.iconWrapper}>
+              <Icon
+                name={showInput ? 'close' : 'add-outline'}
+                size={30}
+                color={showInput ? '#DC2626' : '#2563EB'}
+              />
             </TouchableOpacity>
           </View>
-        )}
-
-        <FlatList
-          data={articles}
-          keyExtractor={(item) => item.id}
-          renderItem={renderArticle}
-          contentContainerStyle={{ paddingVertical: 10 }}
-          ItemSeparatorComponent={() => (
-            <View style={{ height: 1, backgroundColor: isDarkMode ? '#333' : '#ddd' }} />
-          )}
-        />
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -175,31 +199,40 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    marginVertical: 10,
-  },
-  headerButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginRight: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 8,
-  },
   articleRow: {
     paddingVertical: 14,
   },
   articleTitle: {
     fontSize: 17,
+  },
+  inputWrapper: {
+    position: 'absolute',
+    bottom: 65,
+    left: 20,
+    right: 20,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  input: {
+    height: 40,
+    fontSize: 16,
+  },
+  bottomBar: {
+    position: 'absolute',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: 'transparent',
+    borderTopWidth: 0,
+  },
+  iconWrapper: {
+    marginLeft: 12,
   },
 });
