@@ -180,7 +180,7 @@ export default function DashboardScreen() {
               Articles: {articles.length}
             </Text>
 
-            <TouchableOpacity onPress={showInput ? handleAddLink : handleToggleInput} style={styles.iconWrapper}>
+            <TouchableOpacity onPress={handleToggleInput} style={styles.iconWrapper}>
               <Icon
                 name={showInput ? 'close' : 'add-outline'}
                 size={30}
@@ -188,6 +188,7 @@ export default function DashboardScreen() {
               />
             </TouchableOpacity>
           </View>
+
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

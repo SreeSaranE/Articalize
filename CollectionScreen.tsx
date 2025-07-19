@@ -80,7 +80,9 @@ export default function CollectionScreen() {
       Keyboard.dismiss();
     } else {
       setShowInput(true);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -108,7 +110,6 @@ export default function CollectionScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000' : '#fff' }}>
           <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
-
             <FlatList
               data={collections}
               keyExtractor={(item) => item.id}
@@ -143,7 +144,7 @@ export default function CollectionScreen() {
             </Text>
 
             <TouchableOpacity
-              onPress={showInput ? handleAddCollection : handleToggleInput}
+              onPress={handleToggleInput}
               style={styles.iconWrapper}
             >
               <Icon
@@ -181,6 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
+    zIndex: 10,
   },
   input: {
     height: 40,
