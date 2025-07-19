@@ -28,18 +28,10 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   const isDarkMode = colorScheme === 'dark';
 
   const [title, setTitle] = useState(article.title);
-  const [readingTime, setReadingTime] = useState(0);
 
   useEffect(() => {
-    estimateReadingTime(article.content || '');
     cleanUpArticles();
-  }, [article.content]);
-
-  const estimateReadingTime = (content: string) => {
-    const wordsPerMinute = 200;
-    const words = content ? content.split(/\s+/).length : 0;
-    setReadingTime(Math.ceil(words / wordsPerMinute));
-  };
+  }, []);
 
   const handleSaveMetadata = async () => {
     try {
@@ -79,11 +71,9 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
       const stored = await AsyncStorage.getItem('articles');
       const articles: Article[] = stored ? JSON.parse(stored) : [];
 
-      // Remove from articles
       const updatedArticles = articles.filter(a => a.id !== article.id);
       await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
 
-      // Clean up collections properly
       const collectionsRaw = await AsyncStorage.getItem('collections');
       if (collectionsRaw) {
         const collections = JSON.parse(collectionsRaw);
@@ -107,8 +97,6 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
       console.error('Error deleting article:', error);
     }
   };
-
-
 
   const handleShare = async () => {
     try {
@@ -154,10 +142,6 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
 
         <Text style={[styles.metaText, { color: isDarkMode ? '#aaa' : '#555' }]}>
           Added On: {article.dateAdded ? format(new Date(article.dateAdded), 'dd-MM-yyyy h:mm a') : 'N/A'}
-        </Text>
-
-        <Text style={[styles.metaText, { color: isDarkMode ? '#aaa' : '#555' }]}>
-          Reading Time: {article.content ? (readingTime > 0 ? `${readingTime} min` : 'Less than 1 min') : 'Content missing'}
         </Text>
 
         <TouchableOpacity onPress={() => Linking.openURL(article.url)}>

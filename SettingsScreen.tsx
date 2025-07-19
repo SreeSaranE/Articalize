@@ -8,7 +8,6 @@ import {
   Platform,
   StatusBar,
   useColorScheme,
-  Image,
   Alert,
   TextInput,
 } from 'react-native';
@@ -18,7 +17,7 @@ import { RootStackParamList } from './types';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -28,15 +27,15 @@ export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   const [username, setUsername] = useState('USER0');
-  const [profileUri, setProfileUri] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [originalUsername, setOriginalUsername] = useState('USER0');
 
   useEffect(() => {
     const loadData = async () => {
       const storedName = await AsyncStorage.getItem('username');
-      const storedUri = await AsyncStorage.getItem('profileUri');
-      if (storedName) setUsername(storedName);
-      if (storedUri) setProfileUri(storedUri);
+      if (storedName) {
+        setUsername(storedName);
+        setOriginalUsername(storedName);
+      }
     };
     loadData();
   }, []);
@@ -44,8 +43,7 @@ export default function SettingsScreen() {
   const handleSave = async () => {
     try {
       await AsyncStorage.setItem('username', username);
-      if (profileUri) await AsyncStorage.setItem('profileUri', profileUri);
-      setIsEditing(false);
+      setOriginalUsername(username);
       Alert.alert('Profile updated');
     } catch (e) {
       console.error('Save error:', e);
@@ -53,32 +51,17 @@ export default function SettingsScreen() {
     }
   };
 
-  const handlePickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission required to access photos.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets?.[0]?.uri) {
-      setProfileUri(result.assets[0].uri);
-      setIsEditing(true);
-    }
-  };
-
   const handleExportData = async () => {
     try {
+      const storedArticles = await AsyncStorage.getItem('articles');
+      const storedCollections = await AsyncStorage.getItem('collections');
+
       const data = {
         username,
-        profileUri,
-        articles: [],
+        articles: storedArticles ? JSON.parse(storedArticles) : [],
+        collections: storedCollections ? JSON.parse(storedCollections) : [],
       };
+
       const json = JSON.stringify(data, null, 2);
       const fileUri = FileSystem.documentDirectory + 'data-export.json';
       await FileSystem.writeAsStringAsync(fileUri, json);
@@ -91,6 +74,37 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('Export failed:', error);
       Alert.alert('Failed to export data');
+    }
+  };
+
+  const handleImportData = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.assets?.[0]?.uri) {
+        const json = await FileSystem.readAsStringAsync(result.assets[0].uri);
+        const data = JSON.parse(json);
+
+        if (data.username) {
+          await AsyncStorage.setItem('username', data.username);
+          setUsername(data.username);
+          setOriginalUsername(data.username);
+        }
+        if (data.articles) {
+          await AsyncStorage.setItem('articles', JSON.stringify(data.articles));
+        }
+        if (data.collections) {
+          await AsyncStorage.setItem('collections', JSON.stringify(data.collections));
+        }
+
+        Alert.alert('Data imported successfully!');
+      }
+    } catch (error) {
+      console.error('Import failed:', error);
+      Alert.alert('Failed to import data');
     }
   };
 
@@ -108,71 +122,45 @@ export default function SettingsScreen() {
         },
       ]}
     >
-      <Text style={[styles.headerText, { color: isDarkMode ? '#fff' : '#000' }]}>
-        Settings
-      </Text>
+      <Text style={[styles.headerText, { color: isDarkMode ? '#fff' : '#000' }]}>Settings</Text>
 
       <View style={styles.profileContainer}>
-        <TouchableOpacity onPress={handlePickImage}>
-          <Image
-            source={
-              profileUri ? { uri: profileUri } : require('./assets/icon.png')
-            }
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
+        <TextInput
+          value={username}
+          onChangeText={setUsername}
+          style={[
+            styles.usernameInput,
+            {
+              color: isDarkMode ? '#fff' : '#000',
+              borderColor: isDarkMode ? '#555' : '#ccc',
+            },
+          ]}
+        />
 
-        {isEditing ? (
-          <TextInput
-            value={username}
-            onChangeText={setUsername}
-            style={[
-              styles.usernameInput,
-              {
-                color: isDarkMode ? '#fff' : '#000',
-                borderColor: isDarkMode ? '#555' : '#ccc',
-              },
-            ]}
-          />
-        ) : (
-          <Text style={[styles.username, { color: isDarkMode ? '#fff' : '#000' }]}>
-            {username}
-          </Text>
-        )}
-
-        {isEditing ? (
+        {username !== originalUsername && (
           <TouchableOpacity
             onPress={handleSave}
             style={[styles.editButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
           >
             <Text style={{ color: '#fff', fontWeight: '600' }}>Save</Text>
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => setIsEditing(true)}
-            style={[styles.editButton, { backgroundColor: isDarkMode ? '#333' : '#4F46E5' }]}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Edit</Text>
-          </TouchableOpacity>
         )}
       </View>
 
       <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
-        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
-          Export Data
-        </Text>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Export Data</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.settingItem} onPress={handleImportData}>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Import Data</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
-        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>
-          Privacy Policy
-        </Text>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Privacy Policy</Text>
       </TouchableOpacity>
 
       <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
-        <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>
-          Version 2.0.0
-        </Text>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>Version 2.0.0</Text>
       </View>
     </SafeAreaView>
   );
@@ -191,17 +179,6 @@ const styles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     marginBottom: 30,
-  },
-  profileImage: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    marginBottom: 10,
-  },
-  username: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
   },
   usernameInput: {
     fontSize: 18,

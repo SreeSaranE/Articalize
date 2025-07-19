@@ -15,7 +15,7 @@ import { sampleArticles } from './articles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
-import { fetchPageTitle, fetchPageContent } from './fetchPageTitle';
+import { fetchPageTitle} from './fetchPageTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -91,15 +91,12 @@ export default function DashboardScreen() {
     try {
       const url = linkInputValue.trim();
       const pageTitle = await fetchPageTitle(url);
-      const pageContent = await fetchPageContent(url);
 
       const newArticle: Article = {
         id: Date.now().toString(),
         title: (pageTitle || 'Untitled Article').split(' ').slice(0, 10).join(' '),
         url: url,
         dateAdded: new Date().toISOString(),
-        content: pageContent || '', // Make sure Article type includes content
-        tags: [],
       };
 
       const updatedArticles = [...articles, newArticle];
@@ -112,6 +109,7 @@ export default function DashboardScreen() {
       console.log('Error adding article:', error);
     }
   };
+
 
   const handlePress = (item: Article) => {
     navigation.navigate('ArticleDetail', { article: item });

@@ -2,8 +2,6 @@ import React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
-import LoginScreen from './LoginScreen';
-import SignUpScreen from './SignUpScreen';
 import BottomTabsNavigation from './BottomTabsNavigation';
 import ArticleDetailScreen from './ArticleDetailScreen';
 import { RootStackParamList } from './types';

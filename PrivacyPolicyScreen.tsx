@@ -26,7 +26,8 @@ export default function PrivacyPolicyScreen() {
         ]}
       >
         {/* Replace this with your actual privacy policy text */}
-        This is where your privacy policy goes...
+        The entire code is poen to everyone and no restiction to use or modify it.
+        if possible just fork this app 
       </Text>
     </ScrollView>
   );
