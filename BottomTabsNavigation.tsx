@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DashboardScreen from './DashboardScreen';
 import CollectionScreen from './CollectionScreen';
 import SettingsScreen from './SettingsScreen';
@@ -15,14 +15,24 @@ export default function BottomTabsNavigation() {
     <Tab.Navigator
       initialRouteName="Dashboard"
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          let iconName: keyof typeof MaterialIcons.glyphMap = 'dashboard';
+        tabBarIcon: ({ color, size, focused }) => {
+          let iconName = 'view-dashboard-outline';
 
-          if (route.name === 'Dashboard') iconName = 'dashboard';
-          if (route.name === 'Collection') iconName = 'collections-bookmark';
-          if (route.name === 'Settings') iconName = 'settings';
+          if (route.name === 'Dashboard') {
+            iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
+          } else if (route.name === 'Collection') {
+            iconName = focused ? 'bookmark' : 'bookmark-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'cog' : 'cog-outline';
+          }
 
-          return <MaterialIcons name={iconName} size={size} color={color} />;
+          return (
+            <MaterialCommunityIcons
+              name={iconName as any}
+              size={size}
+              color={color}
+            />
+          );
         },
         tabBarActiveTintColor: colorScheme === 'dark' ? '#ffffff' : '#4F46E5',
         tabBarInactiveTintColor: 'gray',
@@ -31,7 +41,10 @@ export default function BottomTabsNavigation() {
           backgroundColor: colorScheme === 'dark' ? '#121212' : '#fff',
           borderTopWidth: 0,
           elevation: 10,
+          paddingBottom: 6,
+          height: 75,
         },
+        tabBarShowLabel: false,
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
