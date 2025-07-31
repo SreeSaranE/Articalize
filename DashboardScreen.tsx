@@ -20,8 +20,15 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
 import { fetchPageTitle } from './fetchPageTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ShareMenu from 'react-native-share-menu';
 // @ts-ignore
 import Icon from 'react-native-vector-icons/Ionicons';
+
+type ShareData = {
+  mimeType: string;
+  data: string;
+  extraData?: Record<string, any>;
+};
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -35,6 +42,19 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadArticles();
+    handleInitialShare();
+    const removeListener = ShareMenu.addNewShareListener((item: ShareData | null) => {
+      if (!item) return;
+      const { data, mimeType } = item;
+      if (typeof data === 'string' && data.startsWith('http')) {
+        handleAddLink(data);
+      }
+    });
+
+    return () => {
+      removeListener?.();
+      ShareMenu.clearNewShareListeners();
+    };
   }, []);
 
   useFocusEffect(
@@ -90,11 +110,11 @@ export default function DashboardScreen() {
     }
   };
 
-  const handleAddLink = async () => {
-    if (!linkInputValue.trim()) return;
+  const handleAddLink = async (urlFromParam?: string) => {
+    const url = urlFromParam ? urlFromParam.trim() : linkInputValue.trim();
+    if (!url) return;
 
     try {
-      const url = linkInputValue.trim();
       const pageTitle = await fetchPageTitle(url);
 
       const newArticle: Article = {
@@ -108,9 +128,11 @@ export default function DashboardScreen() {
       setArticles(updatedArticles);
       await saveArticles(updatedArticles);
 
-      setLinkInputValue('');
-      setShowInput(false);
-      Keyboard.dismiss();
+      if (!urlFromParam) {
+        setLinkInputValue('');
+        setShowInput(false);
+        Keyboard.dismiss();
+      }
     } catch (error) {
       console.log('Error adding article:', error);
     }
@@ -139,6 +161,18 @@ export default function DashboardScreen() {
     </TouchableOpacity>
   );
 
+  const handleShareData = (item: ShareData | null) => {
+    if (!item) return;
+    const { data, mimeType } = item;
+    if (typeof data === 'string' && data.startsWith('http')) {
+      handleAddLink(data);
+    }
+  };
+
+  const handleInitialShare = () => {
+    ShareMenu.getInitialShare(handleShareData);
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -146,7 +180,12 @@ export default function DashboardScreen() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000' : '#fff' }}>
-          <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+          <View
+            style={[
+              styles.container,
+              { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+            ]}
+          >
             <FlatList
               data={articles}
               keyExtractor={(item) => item.id}
@@ -158,9 +197,13 @@ export default function DashboardScreen() {
             />
           </View>
 
-          {/* Input Field Above Bottom Bar */}
           {showInput && (
-            <View style={[styles.inputWrapper, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+            <View
+              style={[
+                styles.inputWrapper,
+                { backgroundColor: isDarkMode ? '#000' : '#fff' },
+              ]}
+            >
               <TextInput
                 ref={inputRef}
                 value={linkInputValue}
@@ -168,27 +211,38 @@ export default function DashboardScreen() {
                 placeholder="Paste link here"
                 placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
                 style={[styles.input, { color: isDarkMode ? '#fff' : '#000' }]}
-                onSubmitEditing={handleAddLink}
+                onSubmitEditing={() => handleAddLink()}
                 returnKeyType="done"
               />
             </View>
           )}
 
-          {/* Bottom Info + Action */}
-          <View style={styles.bottomBar}>
-            <Text style={{ fontSize: 15, color: isDarkMode ? '#ccc' : '#333', fontWeight: '600' }}>
-              Articles: {articles.length}
-            </Text>
+          {!showInput && (
+            <View style={styles.bottomBar}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: isDarkMode ? '#ccc' : '#333',
+                  fontWeight: '600',
+                }}
+              >
+                Articles: {articles.length}
+              </Text>
 
-            <TouchableOpacity onPress={handleToggleInput} style={styles.iconWrapper}>
-              <Icon
-                name={showInput ? 'close' : 'add-outline'}
-                size={30}
-                color={showInput ? '#DC2626' : '#2563EB'}
-              />
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={handleToggleInput} style={styles.iconWrapper}>
+                <Icon name="add-outline" size={30} color="#2563EB" />
+              </TouchableOpacity>
+            </View>
+          )}
 
+          {showInput && (
+            <View style={styles.bottomBar}>
+              <View />
+              <TouchableOpacity onPress={handleToggleInput} style={styles.iconWrapper}>
+                <Icon name="close" size={30} color="#DC2626" />
+              </TouchableOpacity>
+            </View>
+          )}
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
