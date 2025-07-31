@@ -8,9 +8,8 @@
 
 * 📥 **Save Articles** – Store articles with metadata like title, URL, image, and summary.
 * 🗂️ **Organize** – Use tags and folders to keep your articles organized.
-* 🖼️ **Card UI** – Clean, responsive card-style interface for browsing saved articles.
+* 🖼️ **List UI** – Clean, responsive card-style interface for browsing saved articles.
 * 🔍 **Search & Filter** – Quickly find articles by title, tag, or source.
-* ☁️ **Cloud Sync** – (Planned) Access your articles across devices.
 * 🧠 **AI Summarization & Tagging** – (Future) Automatically summarize and categorize saved content.
 
 ---
@@ -19,11 +18,8 @@
 
 | Layer    | Tech                      |
 | -------- | ------------------------- |
-| Frontend | React.js + Tailwind CSS   |
-| Backend  | Node.js + Express.js      |
-| Database | MongoDB / PostgreSQL      |
-| Auth     | Firebase / Auth0 (TBD)    |
-| Hosting  | Vercel + Railway / Render |
+| Frontend | React.js                  |
+| Database | AsyncStorage              |
 
 > 📱 Plans for a mobile app using React Native or Flutter are in the roadmap.
 
@@ -45,12 +41,12 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 
 ### 🗺️ Roadmap
 
-* [.] Save article cards
-* [.] Tag and organize
-* [ ] Add browser extension
-* [ ] AI summarization
-* [ ] Mobile app support
-* [.] Dark mode
+[x] Save article cards
+[x] Tag and organize
+[x] Mobile app support
+[x] Dark mode
+[ ] Search & Filter
+[ ] AI summarization
 
 ---
 
@@ -62,7 +58,7 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 
 ### 💬 Community & Feedback
 
-* Issues and feature requests → [GitHub Issues](https://github.com/yourusername/Articalize/issues)
-* Discussions and ideas → [GitHub Discussions](https://github.com/yourusername/Articalize/discussions)
+* Issues and feature requests → [GitHub Issues](https://github.com/SreeSaranE/Articalize/issues)
+* Discussions and ideas → [GitHub Discussions](https://github.com/SreeSaranE/Articalize/discussions)
 
 ---
