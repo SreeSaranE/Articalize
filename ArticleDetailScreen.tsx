@@ -18,7 +18,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, Article } from './types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
-import { Ionicons } from '@expo/vector-icons'; // Tick icon
+import { Ionicons } from '@expo/vector-icons';
 
 type ArticleDetailProps = NativeStackScreenProps<RootStackParamList, 'ArticleDetail'>;
 
@@ -26,7 +26,6 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   const { article } = route.params;
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-
   const [title, setTitle] = useState(article.title);
 
   useEffect(() => {
@@ -39,9 +38,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
       const articles: Article[] = stored ? JSON.parse(stored) : [];
 
       const updatedArticles = articles.map((a) =>
-        a.id === article.id
-          ? { ...a, title: title.trim() }
-          : a
+        a.id === article.id ? { ...a, title: title.trim() } : a
       );
 
       await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
@@ -67,35 +64,45 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   };
 
   const handleDelete = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('articles');
-      const articles: Article[] = stored ? JSON.parse(stored) : [];
+    Alert.alert(
+      'Delete Article',
+      'Are you sure you want to delete this article?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const stored = await AsyncStorage.getItem('articles');
+              const articles: Article[] = stored ? JSON.parse(stored) : [];
 
-      const updatedArticles = articles.filter(a => a.id !== article.id);
-      await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+              const updatedArticles = articles.filter(a => a.id !== article.id);
+              await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
 
-      const collectionsRaw = await AsyncStorage.getItem('collections');
-      if (collectionsRaw) {
-        const collections = JSON.parse(collectionsRaw);
+              const collectionsRaw = await AsyncStorage.getItem('collections');
+              if (collectionsRaw) {
+                const collections = JSON.parse(collectionsRaw);
+                const updatedCollections = collections.map((collection: any) => ({
+                  ...collection,
+                  articles: collection.articles.filter((a: any) => 
+                    updatedArticles.some(updated => updated.id === a.id)
+                  ),
+                }));
+                await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
+              }
 
-        const updatedCollections = collections.map((collection: any) => {
-          const cleanedArticles = collection.articles.filter((a: any) => {
-            return updatedArticles.some(updated => updated.id === a.id);
-          });
-
-          return {
-            ...collection,
-            articles: cleanedArticles,
-          };
-        });
-
-        await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
-      }
-
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error deleting article:', error);
-    }
+              navigation.goBack();
+            } catch (error) {
+              console.error('Error deleting article:', error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleShare = async () => {
@@ -113,6 +120,7 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Article Title */}
         <View style={styles.titleRow}>
           <TextInput
             style={[
@@ -130,36 +138,48 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
             textAlignVertical="top"
           />
           {titleChanged && (
-            <TouchableOpacity onPress={handleSaveMetadata} style={styles.tickButton}>
+            <TouchableOpacity onPress={handleSaveMetadata} style={styles.saveButton}>
               <Ionicons name="checkmark" size={24} color="#4CAF50" />
             </TouchableOpacity>
           )}
         </View>
 
-        <Text style={[styles.metaText, { color: isDarkMode ? '#aaa' : '#555' }]}>
-          ID: {article.id}
+        {/* Article Metadata */}
+        <Text style={[styles.dateText, { color: isDarkMode ? '#aaa' : '#666' }]}>
+          {article.dateAdded ? format(new Date(article.dateAdded), 'MMMM d, yyyy • h:mm a') : 'N/A'}
         </Text>
-
-        <Text style={[styles.metaText, { color: isDarkMode ? '#aaa' : '#555' }]}>
-          Added On: {article.dateAdded ? format(new Date(article.dateAdded), 'dd-MM-yyyy h:mm a') : 'N/A'}
-        </Text>
-
-        <TouchableOpacity onPress={() => Linking.openURL(article.url)}>
-          <Text style={[styles.actionText, { color: '#4F46E5' }]}>Open in Browser</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleShare}>
-          <Text style={[styles.actionText, { color: '#2196F3' }]}>Share Article</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('AddToCollection', { article })}>
-          <Text style={[styles.actionText, { color: '#FF9800' }]}>Add to Collection</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleDelete}>
-          <Text style={[styles.actionText, { color: '#E53935' }]}>Delete</Text>
-        </TouchableOpacity>
       </ScrollView>
+
+      {/* Action Buttons Bar */}
+      <View style={[styles.actionBar, { backgroundColor: isDarkMode ? '#1C1C1E' : '#F5F5F5' }]}>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => Linking.openURL(article.url)}
+        >
+          <Ionicons name="open-outline" size={24} color={isDarkMode ? '#0A84FF' : '#007AFF'} />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={handleShare}
+        >
+          <Ionicons name="share-outline" size={24} color={isDarkMode ? '#30D158' : '#34C759'} />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('AddToCollection', { article })}
+        >
+          <Ionicons name="folder-outline" size={24} color={isDarkMode ? '#FF9F0A' : '#FF9500'} />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={handleDelete}
+        >
+          <Ionicons name="trash-outline" size={24} color={isDarkMode ? '#FF453A' : '#FF3B30'} />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -171,10 +191,12 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 80, // Space for action bar
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
   },
   titleInput: {
     flex: 1,
@@ -184,17 +206,32 @@ const styles = StyleSheet.create({
     minHeight: 60,
     paddingRight: 12,
   },
-  tickButton: {
+  saveButton: {
     padding: 6,
+    marginLeft: 8,
   },
-  metaText: {
+  dateText: {
     fontSize: 14,
-    marginBottom: 8,
-    marginTop: 10,
+    marginBottom: 20,
   },
-  actionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginVertical: 12,
+  actionBar: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  actionButton: {
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  actionLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '500',
   },
 });

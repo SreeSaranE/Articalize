@@ -245,8 +245,8 @@ export default function DashboardScreen() {
               >
                 <Icon
                   name={showSearch ? 'close' : 'search-outline'}
-                  size={25}
-                  color={showSearch ? '#DC2626' : isDarkMode ? '#ccc' : '#333'}
+                  size={28}
+                  color={showSearch ? '#DC2626' : '#2563EB'}
                 />
               </TouchableOpacity>
 
@@ -323,6 +323,7 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     // Styles remain the same
+    marginLeft: 10,
   },
   emptyContainer: {
     flex: 1,
