@@ -1,20 +1,22 @@
-export type Article = {
-  id: string;
-  title: string;
-  url: string;
-  dateAdded?: string;
-  content?: string;
-};
+import { Article } from './types';
 
 export const sampleArticles: Article[] = [
   {
-    id: '1',  
+    id: '1',
     title: 'The Rise of Artificial Intelligence',
-    url: 'https://www.example.com/article1'
+    url: 'https://www.example.com/article1',
+    dateAdded: '',
+    content: '',
+    excerpt: '',
+    summary: ''
   },
   {
     id: '2',
     title: 'Exploring the Universe',
-    url: 'https://www.example.com/article2'
+    url: 'https://www.example.com/article2',
+    dateAdded: '',
+    content: '',
+    excerpt: '',
+    summary: ''
   }
 ];

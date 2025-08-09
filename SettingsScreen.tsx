@@ -158,7 +158,7 @@ export default function SettingsScreen() {
       </TouchableOpacity>
 
       <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
-        <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>Version 2.0.0</Text>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#777' : '#666' }]}>Version 1.0.2</Text>
       </View>
     </SafeAreaView>
   );

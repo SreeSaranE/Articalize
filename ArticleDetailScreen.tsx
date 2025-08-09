@@ -144,6 +144,20 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
           )}
         </View>
 
+        <View style={[styles.summaryContainer, { 
+          backgroundColor: isDarkMode ? '#1E1E1E' : '#F0F0F0' 
+        }]}>
+          <Text style={[styles.summaryHeader, { 
+            color: isDarkMode ? '#FFFFFF' : '#000000' 
+          }]}>
+            Summary
+          </Text>
+          <Text style={[styles.summaryText, { 
+            color: isDarkMode ? '#CCCCCC' : '#333333' 
+          }]}>
+            {article.summary || 'No summary available'}
+          </Text>
+        </View>
         {/* Article Metadata */}
         <Text style={[styles.dateText, { color: isDarkMode ? '#aaa' : '#666' }]}>
           {article.dateAdded ? format(new Date(article.dateAdded), 'MMMM d, yyyy • h:mm a') : 'N/A'}
@@ -233,4 +247,18 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
+  summaryContainer: {
+  marginTop: 20,
+  padding: 15,
+  borderRadius: 8,
+},
+summaryHeader: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 8,
+},
+summaryText: {
+  fontSize: 14,
+  lineHeight: 20,
+},
 });

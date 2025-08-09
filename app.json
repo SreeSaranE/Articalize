@@ -28,7 +28,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "b126dfb0-77e8-4703-8963-2da50908d370"
+        "projectId": "b126dfb0-77e8-4703-8963-2da50908d370",
+        "hfToken": "PLACEHOLDER_ONLY"
       }
     }
   }

@@ -15,7 +15,8 @@
     "@react-navigation/bottom-tabs": "^7.4.2",
     "@react-navigation/native": "^7.1.14",
     "@react-navigation/native-stack": "^7.3.21",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
     "date-fns": "^4.1.0",
     "expo": "~53.0.17",
     "expo-dev-client": "~5.2.4",
@@ -26,21 +27,30 @@
     "expo-status-bar": "~2.2.3",
     "express": "^5.1.0",
     "jsdom": "^26.1.0",
+    "linkedom": "^0.18.11",
     "react": "19.0.0",
     "react-native": "0.79.5",
+    "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-get-random-values": "~1.11.0",
+    "react-native-html-parser": "^0.1.0",
+    "react-native-readability": "^0.0.1",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
+    "react-native-url-polyfill": "^2.0.0",
     "react-native-vector-icons": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "^19.1.0",
+    "@types/cheerio": "^0.22.35",
+    "@types/domhandler": "^2.4.5",
+    "@types/jsdom": "^21.1.7",
     "@types/react": "~19.0.10",
+    "@types/react-native-vector-icons": "^6.4.18",
+    "metro-react-native-babel-preset": "^0.77.0",
     "typescript": "~5.8.3"
   },
-  
   "private": true
-  
 }
