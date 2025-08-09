@@ -41,12 +41,12 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 
 ### 🗺️ Roadmap
 
-[x] Save article cards
-[x] Tag and organize
-[x] Mobile app support
-[x] Dark mode
-[ ] Search & Filter
-[ ] AI summarization
+- [x] Save article cards
+- [x] Tag and organize
+- [x] Mobile app support
+- [x] Dark mode
+- [x] Search & Filter
+- [ ] AI summarization
 
 ---
 
