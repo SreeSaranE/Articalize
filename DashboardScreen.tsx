@@ -31,6 +31,7 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadArticles();
+    AsyncStorage.removeItem('articles');
   }, []);
 
   useFocusEffect(
@@ -43,7 +44,14 @@ export default function DashboardScreen() {
     try {
       const stored = await AsyncStorage.getItem('articles');
       if (stored) {
-        setArticles(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.every(a => typeof a === 'object' && a !== null && 'title' in a)) {
+          setArticles(parsed as Article[]);
+        } else {
+          console.warn('Invalid articles data found, clearing storage');
+          await AsyncStorage.removeItem('articles');
+          setArticles([]);
+        }
       }
     } catch (error) {
       console.log('Failed to load articles', error);
@@ -64,15 +72,16 @@ export default function DashboardScreen() {
 
     try {
       const url = linkInputValue.trim();
-      const { title, content, excerpt, summary } = await fetchAndSummarize(url);
+      const summary = await fetchAndSummarize(url);
 
+// You might want to fetch title, content, excerpt differently, or set defaults
       const newArticle: Article = {
         id: Date.now().toString(),
-        title,
+        title: url,         // or extract title separately if possible
         url,
         dateAdded: new Date().toISOString(),
-        content,
-        excerpt,
+        content: '',        // placeholder or fetch separately
+        excerpt: '',        // placeholder or fetch separately
         summary,
       };
 
