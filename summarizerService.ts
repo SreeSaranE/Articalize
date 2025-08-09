@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HF_API_TOKEN = "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";
+import { HUGGINGFACE_API_KEY } from '@env';
 const HF_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 export const summarizeContent = async (text: string) => {
@@ -10,7 +10,7 @@ export const summarizeContent = async (text: string) => {
       { inputs: text },
       {
         headers: {
-          Authorization: `Bearer ${HF_API_TOKEN}`,
+          Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
         },
       }
     );
