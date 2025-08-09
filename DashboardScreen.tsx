@@ -179,4 +179,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconWrapper: { padding: 6 },
-});
+});//

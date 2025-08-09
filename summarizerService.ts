@@ -19,4 +19,4 @@ export const summarizeContent = async (text: string) => {
     console.error("Summarization error:", error);
     return text.split(/\s+/).slice(0, 50).join(" ") + "..."; // Fallback
   }
-};
+};//
