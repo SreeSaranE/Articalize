@@ -1,7 +1,8 @@
 import axios from 'axios';
-
 import { HUGGINGFACE_API_KEY } from '@env';
+
 const HF_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
+
 
 export const summarizeContent = async (text: string) => {
   try {
@@ -19,4 +20,4 @@ export const summarizeContent = async (text: string) => {
     console.error("Summarization error:", error);
     return text.split(/\s+/).slice(0, 50).join(" ") + "..."; // Fallback
   }
-};//
+};

@@ -1,9 +1,34 @@
 import { DOMParser } from 'react-native-html-parser';
 
-export const createDocumentShim = (html: string): any => {
-  const parser = new DOMParser();
-  const parsed: any = parser.parseFromString(html, 'text/html'); // <-- Cast to any
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('[xmldom warning]')) {
+    return; // skip xmldom warnings
+  }
+  originalConsoleWarn(...args);
+};
 
+export const createDocumentShim = (html: string): any => {
+  // Step 1: Clean up HTML before parsing
+  const safeHtml = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '') // remove scripts
+    .replace(/<style[\s\S]*?<\/style>/gi, '')   // remove styles
+    .replace(/<!--[\s\S]*?(?=-->)(-->)/g, '')   // remove comments
+    .replace(/\s(allowfullscreen)(?=\s|>)/gi, ' allowfullscreen="true"')
+    .replace(/\s(itemscope)(?=\s|>)/gi, ' itemscope="true"')
+    .replace(/\s(data-nosnippet)(?=\s|>)/gi, ' data-nosnippet="true"')
+    .replace(/\s(news-link-class)(?=\s|>)/gi, ' news-link-class=""');
+
+  let parsed: any;
+  try {
+    const parser = new DOMParser();
+    parsed = parser.parseFromString(safeHtml, 'text/html');
+  } catch (err) {
+    console.warn('HTML parsing failed, falling back to empty document:', err);
+    parsed = {};
+  }
+
+  // Step 2: Safe element search
   const getElementsByTagName = (tagName: string) => {
     const elements: any[] = [];
 
@@ -46,9 +71,10 @@ export const createDocumentShim = (html: string): any => {
     return { length: 0, item: () => null, [Symbol.iterator]: function* () {} };
   };
 
+  // Step 3: Always return safe shim
   const docShim: any = {
-    documentElement: parsed.documentElement,
-    body: parsed.getElementsByTagName?.('body')?.[0] || parsed.documentElement,
+    documentElement: parsed.documentElement || null,
+    body: parsed.getElementsByTagName?.('body')?.[0] || parsed.documentElement || null,
     head: parsed.getElementsByTagName?.('head')?.[0] || { childNodes: [] },
     title: parsed.getElementsByTagName?.('title')?.[0]?.textContent || '',
     URL: '',
@@ -56,8 +82,8 @@ export const createDocumentShim = (html: string): any => {
     querySelector,
     querySelectorAll,
     createElement: (tag: string) => ({ nodeName: tag.toUpperCase(), childNodes: [] }),
-    createTextNode: (text: string) => ({ nodeName: '#text', textContent: text }),
+    createTextNode: (text: string) => ({ nodeName: '#text', textContent: text })
   };
 
   return docShim;
-};//
+};
