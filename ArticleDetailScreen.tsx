@@ -36,13 +36,11 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
     try {
       const stored = await AsyncStorage.getItem('articles');
       const articles: Article[] = stored ? JSON.parse(stored) : [];
-
       const updatedArticles = articles.map((a) =>
         a.id === article.id ? { ...a, title: title.trim() } : a
       );
-
       await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
-      Alert.alert('Saved', 'Article metadata updated.');
+      Alert.alert('Saved', 'Article title updated.');
     } catch (error) {
       console.error('Error saving metadata:', error);
     }
@@ -64,45 +62,36 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   };
 
   const handleDelete = async () => {
-    Alert.alert(
-      'Delete Article',
-      'Are you sure you want to delete this article?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const stored = await AsyncStorage.getItem('articles');
-              const articles: Article[] = stored ? JSON.parse(stored) : [];
+    Alert.alert('Delete Article', 'Are you sure you want to delete this article?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const stored = await AsyncStorage.getItem('articles');
+            const articles: Article[] = stored ? JSON.parse(stored) : [];
+            const updatedArticles = articles.filter((a) => a.id !== article.id);
+            await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
 
-              const updatedArticles = articles.filter(a => a.id !== article.id);
-              await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
-
-              const collectionsRaw = await AsyncStorage.getItem('collections');
-              if (collectionsRaw) {
-                const collections = JSON.parse(collectionsRaw);
-                const updatedCollections = collections.map((collection: any) => ({
-                  ...collection,
-                  articles: collection.articles.filter((a: any) => 
-                    updatedArticles.some(updated => updated.id === a.id)
-                  ),
-                }));
-                await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
-              }
-
-              navigation.goBack();
-            } catch (error) {
-              console.error('Error deleting article:', error);
+            const collectionsRaw = await AsyncStorage.getItem('collections');
+            if (collectionsRaw) {
+              const collections = JSON.parse(collectionsRaw);
+              const updatedCollections = collections.map((collection: any) => ({
+                ...collection,
+                articles: collection.articles.filter((a: any) =>
+                  updatedArticles.some((updated) => updated.id === a.id)
+                ),
+              }));
+              await AsyncStorage.setItem('collections', JSON.stringify(updatedCollections));
             }
-          },
+            navigation.goBack();
+          } catch (error) {
+            console.error('Error deleting article:', error);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleShare = async () => {
@@ -120,78 +109,66 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Article Title */}
-        <View style={styles.titleRow}>
+        {/* Title */}
+        <View style={styles.titleWrapper}>
           <TextInput
-            style={[
-              styles.titleInput,
-              {
-                color: isDarkMode ? '#fff' : '#000',
-                borderColor: isDarkMode ? '#555' : '#ccc',
-              },
-            ]}
+            style={[styles.titleInput, { color: isDarkMode ? '#fff' : '#000' }]}
             value={title}
             onChangeText={setTitle}
             placeholder="Article Title"
             placeholderTextColor={isDarkMode ? '#555' : '#999'}
-            multiline
-            textAlignVertical="top"
           />
           {titleChanged && (
             <TouchableOpacity onPress={handleSaveMetadata} style={styles.saveButton}>
-              <Ionicons name="checkmark" size={24} color="#4CAF50" />
+              <Ionicons name="checkmark" size={22} color="#4CAF50" />
             </TouchableOpacity>
           )}
         </View>
 
-        <View style={[styles.summaryContainer, { 
-          backgroundColor: isDarkMode ? '#1E1E1E' : '#F0F0F0' 
-        }]}>
-          <Text style={[styles.summaryHeader, { 
-            color: isDarkMode ? '#FFFFFF' : '#000000' 
-          }]}>
-            Summary
-          </Text>
-          <Text style={[styles.summaryText, { 
-            color: isDarkMode ? '#CCCCCC' : '#333333' 
-          }]}>
-            {article.summary || 'No summary available'}
-          </Text>
-        </View>
-        {/* Article Metadata */}
-        <Text style={[styles.dateText, { color: isDarkMode ? '#aaa' : '#666' }]}>
-          {article.dateAdded ? format(new Date(article.dateAdded), 'MMMM d, yyyy • h:mm a') : 'N/A'}
+        {/* Divider (only one) */}
+        <View style={[styles.divider, { borderBottomColor: isDarkMode ? '#333' : '#ddd' }]} />
+
+        {/* Date */}
+        <Text style={[styles.dateText, { color: isDarkMode ? '#888' : '#666' }]}>
+          {article.dateAdded
+            ? format(new Date(article.dateAdded), 'MMMM d, yyyy • h:mm a')
+            : 'N/A'}
+        </Text>
+
+        {/* Summary */}
+        <Text style={[styles.summaryText, { color: isDarkMode ? '#ccc' : '#333' }]}>
+          {article.summary || 'No summary available'}
         </Text>
       </ScrollView>
 
-      {/* Action Buttons Bar */}
-      <View style={[styles.actionBar, { backgroundColor: isDarkMode ? '#1C1C1E' : '#F5F5F5' }]}>
-        <TouchableOpacity 
-          style={styles.actionButton}
+      {/* Minimal Floating Action Buttons */}
+      <View style={styles.fabContainer}>
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: isDarkMode ? '#0A84FF20' : '#007AFF20' }]}
           onPress={() => Linking.openURL(article.url)}
         >
-          <Ionicons name="open-outline" size={24} color={isDarkMode ? '#0A84FF' : '#007AFF'} />
+          <Ionicons name="open-outline" size={22} color={isDarkMode ? '#0A84FF' : '#007AFF'} />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.actionButton}
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: isDarkMode ? '#30D15820' : '#34C75920' }]}
           onPress={handleShare}
         >
-          <Ionicons name="share-outline" size={24} color={isDarkMode ? '#30D158' : '#34C759'} />
+          <Ionicons name="share-outline" size={22} color={isDarkMode ? '#30D158' : '#34C759'} />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.actionButton}
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: isDarkMode ? '#FF9F0A20' : '#FF950020' }]}
           onPress={() => navigation.navigate('AddToCollection', { article })}
         >
-          <Ionicons name="folder-outline" size={24} color={isDarkMode ? '#FF9F0A' : '#FF9500'} />
+          <Ionicons name="folder-outline" size={22} color={isDarkMode ? '#FF9F0A' : '#FF9500'} />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.actionButton}
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: isDarkMode ? '#FF453A20' : '#FF3B3020' }]}
           onPress={handleDelete}
         >
-          <Ionicons name="trash-outline" size={24} color={isDarkMode ? '#FF453A' : '#FF3B30'} />
+          <Ionicons name="trash-outline" size={22} color={isDarkMode ? '#FF453A' : '#FF3B30'} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -205,60 +182,43 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    paddingBottom: 80, // Space for action bar
+    paddingBottom: 100,
   },
-  titleRow: {
+  titleWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   titleInput: {
     flex: 1,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    borderBottomWidth: 1,
-    minHeight: 60,
-    paddingRight: 12,
   },
   saveButton: {
-    padding: 6,
     marginLeft: 8,
   },
+  divider: {
+    borderBottomWidth: 1,
+    marginVertical: 10,
+  },
   dateText: {
-    fontSize: 14,
-    marginBottom: 20,
+    fontSize: 13,
+    marginBottom: 14,
   },
-  actionBar: {
+  summaryText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  fabContainer: {
     position: 'absolute',
-    bottom: 15,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 16,
-    borderTopWidth: 1,
+    bottom: 20,
+    right: 20,
+    gap: 12,
   },
-  actionButton: {
+  fab: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
-    paddingHorizontal: 10,
+    justifyContent: 'center',
   },
-  actionLabel: {
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  summaryContainer: {
-  marginTop: 20,
-  padding: 15,
-  borderRadius: 8,
-},
-summaryHeader: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  marginBottom: 8,
-},
-summaryText: {
-  fontSize: 14,
-  lineHeight: 20,
-},
 });
