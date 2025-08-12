@@ -19,6 +19,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { fetchAndSummarize } from './fetchAndSummarize';
 import { RootStackParamList, Article } from './types';
+import { fetchPageTitle } from './fetchPageTitle';
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -74,11 +75,16 @@ export default function DashboardScreen() {
 
     try {
       const url = linkInputValue.trim();
+
+      // 🔹 Fetch actual page title
+      const pageTitle = await fetchPageTitle(url);
+
+      // 🔹 Get summary
       const summary = await fetchAndSummarize(url);
 
       const newArticle: Article = {
         id: Date.now().toString(),
-        title: url,
+        title: pageTitle || url, // fallback to URL if no title found
         url,
         dateAdded: new Date().toISOString(),
         content: '',
