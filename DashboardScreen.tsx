@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -75,16 +76,12 @@ export default function DashboardScreen() {
 
     try {
       const url = linkInputValue.trim();
-
-      // 🔹 Fetch actual page title
       const pageTitle = await fetchPageTitle(url);
-
-      // 🔹 Get summary
       const summary = await fetchAndSummarize(url);
 
       const newArticle: Article = {
         id: Date.now().toString(),
-        title: pageTitle || url, // fallback to URL if no title found
+        title: pageTitle || url,
         url,
         dateAdded: new Date().toISOString(),
         content: '',
@@ -106,7 +103,6 @@ export default function DashboardScreen() {
     }
   };
 
-  // 🔹 Only title, no summary
   const renderArticle = ({ item }: { item: Article }) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -117,6 +113,11 @@ export default function DashboardScreen() {
   );
 
   return (
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+  >
     <SafeAreaView
       style={[
         styles.container,
@@ -126,6 +127,7 @@ export default function DashboardScreen() {
         },
       ]}
     >
+      {/* Article List */}
       <FlatList
         data={articles}
         keyExtractor={(item) => item.id}
@@ -133,25 +135,37 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 80 }}
       />
 
+      {/* Floating Input (separate from bottom bar) */}
       {showInput && (
-        <View style={[styles.inputWrapper, { backgroundColor: isDarkMode ? '#111' : '#f9f9f9' }]}>
+        <View style={[styles.floatingInputBar, { backgroundColor: isDarkMode ? '#111' : '#f9f9f9' }]}>
           <TextInput
             ref={inputRef}
             value={linkInputValue}
             onChangeText={setLinkInputValue}
             placeholder="Paste article link"
             placeholderTextColor={isDarkMode ? '#777' : '#888'}
-            style={[styles.input, { color: isDarkMode ? '#fff' : '#000' }]}
+            style={[styles.floatingInput, { color: isDarkMode ? '#fff' : '#000' }]}
             onSubmitEditing={handleAddLink}
             returnKeyType="done"
+            autoFocus
           />
+          <TouchableOpacity onPress={handleAddLink} style={styles.sendButton}>
+            {isProcessing ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Icon name="checkmark" size={22} color="#fff" />
+            )}
+          </TouchableOpacity>
         </View>
       )}
 
+      {/* Bottom Bar (always visible) */}
       <View style={styles.bottomBar}>
-        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>Articles: {articles.length}</Text>
+        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>
+          Articles: {articles.length}
+        </Text>
         <TouchableOpacity onPress={() => setShowInput(!showInput)} style={styles.iconWrapper}>
-          {isProcessing ? (
+          {isProcessing && !showInput ? (
             <ActivityIndicator color={isDarkMode ? '#fff' : '#000'} />
           ) : (
             <Icon
@@ -163,6 +177,7 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  </KeyboardAvoidingView>
   );
 }
 
@@ -170,17 +185,39 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   articleRow: { paddingVertical: 14, borderBottomWidth: 0.5, borderColor: '#444' },
   articleTitle: { fontSize: 16, fontWeight: '500' },
-  inputWrapper: {
+
+  floatingInputContainer: {
     position: 'absolute',
     bottom: 60,
-    left: 16,
-    right: 16,
-    padding: 10,
+    left: 0,
+    right: 0,
+  },
+  floatingInputBar: {
+    position: 'absolute',
+    bottom: 60, // stays above bottom bar
+    left: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  input: { height: 40, fontSize: 16 },
+  floatingInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    paddingHorizontal: 8,
+  },
+  sendButton: {
+    marginLeft: 8,
+    backgroundColor: '#2563eb',
+    borderRadius: 6,
+    padding: 8,
+  },
+
   bottomBar: {
     position: 'absolute',
     flexDirection: 'row',
@@ -192,7 +229,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: 'transparent',
-    borderTopWidth: 0,
   },
   iconWrapper: { padding: 6 },
 });
