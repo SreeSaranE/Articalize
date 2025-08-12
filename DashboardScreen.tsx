@@ -10,6 +10,8 @@ import {
   SafeAreaView,
   Keyboard,
   ActivityIndicator,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -74,14 +76,13 @@ export default function DashboardScreen() {
       const url = linkInputValue.trim();
       const summary = await fetchAndSummarize(url);
 
-// You might want to fetch title, content, excerpt differently, or set defaults
       const newArticle: Article = {
         id: Date.now().toString(),
-        title: url,         // or extract title separately if possible
+        title: url,
         url,
         dateAdded: new Date().toISOString(),
-        content: '',        // placeholder or fetch separately
-        excerpt: '',        // placeholder or fetch separately
+        content: '',
+        excerpt: '',
         summary,
       };
 
@@ -99,20 +100,26 @@ export default function DashboardScreen() {
     }
   };
 
+  // 🔹 Only title, no summary
   const renderArticle = ({ item }: { item: Article }) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
       style={styles.articleRow}
     >
       <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>{item.title}</Text>
-      <Text style={[styles.articleSummary, { color: isDarkMode ? '#aaa' : '#555' }]} numberOfLines={2}>
-        {item.summary}
-      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDarkMode ? '#000' : '#fff',
+          paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        },
+      ]}
+    >
       <FlatList
         data={articles}
         keyExtractor={(item) => item.id}
@@ -157,7 +164,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   articleRow: { paddingVertical: 14, borderBottomWidth: 0.5, borderColor: '#444' },
   articleTitle: { fontSize: 16, fontWeight: '500' },
-  articleSummary: { fontSize: 14, marginTop: 4 },
   inputWrapper: {
     position: 'absolute',
     bottom: 60,
@@ -183,4 +189,4 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
   },
   iconWrapper: { padding: 6 },
-});//
+});
