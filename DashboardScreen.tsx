@@ -161,7 +161,7 @@ export default function DashboardScreen() {
 
       {/* Bottom Bar (always visible) */}
       <View style={styles.bottomBar}>
-        <Text style={{ color: isDarkMode ? '#ccc' : '#333' }}>
+        <Text style={{ fontSize: 15, color: isDarkMode ? '#ccc' : '#333', fontWeight: '600' }}>
           Articles: {articles.length}
         </Text>
         <TouchableOpacity onPress={() => setShowInput(!showInput)} style={styles.iconWrapper}>
@@ -184,7 +184,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   articleRow: { paddingVertical: 14, borderBottomWidth: 0.5, borderColor: '#444' },
-  articleTitle: { fontSize: 16, fontWeight: '500' },
+  articleTitle: { fontSize: 17, fontWeight: '500' },
 
   floatingInputContainer: {
     position: 'absolute',
