@@ -166,7 +166,7 @@ export default function CollectionScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   collectionRow: { paddingVertical: 14, flexDirection: 'row', justifyContent: 'space-between' },
-  collectionName: { fontSize: 17, fontWeight: '500' },
+  collectionName: { fontSize: 17, fontWeight: '400' },
 
   floatingInputBar: {
     position: 'absolute',

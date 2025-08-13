@@ -117,6 +117,9 @@ export default function ArticleDetailScreen({ route, navigation }: ArticleDetail
             onChangeText={setTitle}
             placeholder="Article Title"
             placeholderTextColor={isDarkMode ? '#555' : '#999'}
+            multiline
+            scrollEnabled={false}
+            textAlignVertical="top"
           />
           {titleChanged && (
             <TouchableOpacity onPress={handleSaveMetadata} style={styles.saveButton}>
@@ -192,6 +195,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 22,
     fontWeight: 'bold',
+    lineHeight: 25,
   },
   saveButton: {
     marginLeft: 8,

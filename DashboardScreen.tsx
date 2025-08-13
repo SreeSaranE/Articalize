@@ -184,7 +184,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   articleRow: { paddingVertical: 14, borderBottomWidth: 0.5, borderColor: '#444' },
-  articleTitle: { fontSize: 17, fontWeight: '500' },
+  articleTitle: { fontSize: 17, fontWeight: '400' },
 
   floatingInputContainer: {
     position: 'absolute',
