@@ -6,11 +6,21 @@ const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/facebook/bart-
 
 const cleanHTML = (html: string): string => {
   return html
-    .replace(/<\s+/g, '<') // remove spaces after <
+    // Remove spaces after "<"
+    .replace(/<\s+/g, '<')
+    // Replace &nbsp; with space
     .replace(/&nbsp;/g, ' ')
+    // Fix invalid self-closing attributes like attr="/ or attr=/
+    .replace(/=\s*"[^"]*\/\s*"/g, match => match.replace(/\/\s*"/, '"'))
+    .replace(/=\s*'[^']*\/\s*'/g, match => match.replace(/\/\s*'/, "'"))
+    // Remove stray slashes in attributes (e.g., id=/foo)
+    .replace(/=\s*\/[^\s>]+/g, '')
+    // Collapse whitespace
     .replace(/\s+/g, ' ')
-    .replace(/[^\x00-\x7F]+/g, ''); // remove non-ASCII chars
+    // Remove non-ASCII chars (to avoid parser choke)
+    .replace(/[^\x00-\x7F]+/g, '');
 };
+
 
 const forEachChild = (nodeList: any, fn: (n: any) => void) => {
   if (!nodeList) return;

@@ -1,7 +1,13 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, LogBox } from 'react-native';
 import Navigation from './Navigation';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Ignore noisy xmldom parse errors
+LogBox.ignoreLogs([
+  '[xmldom error]',  // catch all xmldom errors
+  'attribute invalid close char' // specifically this one
+]);
 
 export default function App() {
   return (
