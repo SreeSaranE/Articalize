@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, ScrollView } from 'react-native';
-import { fetchAndSummarize } from './summarizeArticle';
+import { fetchAndSummarize } from './fetchAndSummarize';
 
 export default function DebugScreen() {
   const [url, setUrl] = useState('');
@@ -16,7 +16,7 @@ export default function DebugScreen() {
     setLogs([]);
     setResult(null);
     addLog(`Testing URL: ${url}`);
-    
+    //
     try {
       const article = await fetchAndSummarize(url);
       setResult(article);

@@ -153,6 +153,11 @@ export default function SettingsScreen() {
         <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Import Data</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.settingItem}
+        onPress={() => navigation.navigate('NonArticleDomains')}>
+        <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Non-Article Domains</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
         <Text style={[styles.settingText, { color: isDarkMode ? '#ccc' : '#333' }]}>Privacy Policy</Text>
       </TouchableOpacity>

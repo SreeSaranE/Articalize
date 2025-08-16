@@ -1,20 +1,26 @@
-// fetchAndSummarize.ts
 import { createDocumentShim } from './htmlParserShim';
 import { HUGGINGFACE_API_KEY } from '@env';
+import { DEFAULT_DOMAINS } from './nonArticleDomains';
 
 const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
 
-// small helper to safely iterate childNodes (NodeList or Array)
+const cleanHTML = (html: string): string => {
+  return html
+    .replace(/<\s+/g, '<') // remove spaces after <
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/[^\x00-\x7F]+/g, ''); // remove non-ASCII chars
+};
+
 const forEachChild = (nodeList: any, fn: (n: any) => void) => {
   if (!nodeList) return;
   if (typeof nodeList.forEach === 'function') {
     nodeList.forEach(fn);
-  } else if (typeof nodeList.length === 'number') {
+  } else {
     for (let i = 0; i < nodeList.length; i++) fn(nodeList[i]);
   }
 };
 
-// recursively extract text from a node (only text nodes)
 const getNodeText = (node: any): string => {
   let text = '';
   const walk = (n: any) => {
@@ -29,7 +35,6 @@ const getNodeText = (node: any): string => {
   return text.replace(/\s+/g, ' ').trim();
 };
 
-// collect <p> elements under node (recursive)
 const collectParagraphs = (node: any): string[] => {
   const paras: string[] = [];
   const walk = (n: any) => {
@@ -37,7 +42,7 @@ const collectParagraphs = (node: any): string[] => {
     if (n.nodeName && n.nodeName.toUpperCase() === 'P') {
       const txt = getNodeText(n);
       if (txt) paras.push(txt);
-      return; // don't descend past paragraphs
+      return;
     }
     forEachChild(n.childNodes, walk);
   };
@@ -45,83 +50,54 @@ const collectParagraphs = (node: any): string[] => {
   return paras;
 };
 
-// heuristic filter for junk paragraphs (hatnotes, nav, disambiguation, coordinates, etc.)
 const isJunkParagraph = (p: string) => {
   const lower = p.toLowerCase();
-  const junkPatterns = [
+  if (lower.length < 50) return true;
+  return [
     'this page includes',
-    'may refer to',
     'is a disambiguation page',
     'coordinates:',
-    'see also',
-    'navigation menu',
-    'help us improve wikipedia',
-    'from wikipedia',
-    'edit section',
-  ];
-  // filter very short paragraphs
-  if (lower.length < 50) return true;
-  return junkPatterns.some(pat => lower.includes(pat));
+    'navigation menu'
+  ].some(pat => lower.includes(pat));
 };
 
 export const fetchAndSummarize = async (url: string): Promise<string> => {
   try {
-    // 0. If it's a Wikipedia page, use the REST summary endpoint (more accurate)
-    try {
-      const parsed = new URL(url);
-      if (parsed.hostname && parsed.hostname.endsWith('wikipedia.org')) {
-        // get the article title from the path (last segment)
-        const parts = parsed.pathname.split('/');
-        const title = decodeURIComponent(parts.pop() || parts.pop() || '');
-        if (title) {
-          const wikiApi = `https://${parsed.hostname}/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
-          const wpResp = await fetch(wikiApi, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-          if (wpResp.ok) {
-            const wpJson = await wpResp.json();
-            // wpJson.extract is plain text summary (lead)
-            if (wpJson?.extract && typeof wpJson.extract === 'string' && wpJson.extract.trim().length > 0) {
-              console.log('[fetchAndSummarize] Wikipedia summary used for:', title);
-              return wpJson.extract.trim();
-            }
-          } else {
-            // log but fall through to HTML parsing if REST endpoint fails
-            const errText = await wpResp.text().catch(() => '');
-            console.warn(`[fetchAndSummarize] Wikipedia REST API failed: ${wpResp.status} ${wpResp.statusText} - ${errText}`);
-          }
-        }
+    const parsed = new URL(url);
+
+    // Skip summarization for non-article domains
+    if (DEFAULT_DOMAINS.some(domain => parsed.hostname.includes(domain))) {
+      try {
+        const resp = await fetch(url);
+        const html = await resp.text();
+        const doc = createDocumentShim(cleanHTML(html));
+        const pageTitle = doc.getElementsByTagName('title')?.[0]?.textContent?.trim();
+        return pageTitle || parsed.hostname;
+      } catch {
+        return parsed.hostname;
       }
-    } catch (e) {
-      // URL parse failure -> continue with generic flow
-      console.warn('[fetchAndSummarize] URL parse failed, continuing with generic extraction', e);
     }
 
-    // 1. Fetch raw HTML
+    // Fetch HTML
     const response = await fetch(url);
-    const html = await response.text();
+    const rawHtml = await response.text();
+    const html = cleanHTML(rawHtml);
 
-    // 2. Parse HTML with shim
+    // Parse HTML
     const doc = createDocumentShim(html);
 
-    // 3. Find best content container heuristically:
-    //    Walk nodes and score candidate nodes (DIV/MAIN/ARTICLE/SECTION/BODY).
+    // Find best node
     let bestNode: any = doc.body || doc.documentElement;
     let bestScore = 0;
 
     const scoreNode = (n: any) => {
-      if (!n || !n.nodeName) return 0;
-      const tag = String(n.nodeName).toUpperCase();
-      // candidate tags
+      if (!n?.nodeName) return 0;
+      const tag = n.nodeName.toUpperCase();
       if (!['DIV', 'MAIN', 'ARTICLE', 'SECTION', 'BODY'].includes(tag)) return 0;
-      // compute text length
       const txt = getNodeText(n);
       let score = txt.length;
-      // give priority if id/class contains content/article keywords
-      try {
-        const id = (typeof n.getAttribute === 'function' && n.getAttribute('id')) || n.id || '';
-        const cls = (typeof n.getAttribute === 'function' && n.getAttribute('class')) || n.className || '';
-        const marker = (id + ' ' + cls).toString().toLowerCase();
-        if (/content|article|main|post|page|mw-content|mw-parser-output|entry/.test(marker)) score += 2000;
-      } catch (_) {}
+      const marker = `${n.id || ''} ${n.className || ''}`.toLowerCase();
+      if (/content|article|main|post|page/.test(marker)) score += 2000;
       return score;
     };
 
@@ -135,48 +111,25 @@ export const fetchAndSummarize = async (url: string): Promise<string> => {
       forEachChild(node.childNodes, walkScore);
     };
 
-    walkScore(doc.documentElement || doc);
+    walkScore(doc.documentElement);
 
-    // Debug log
-    console.log('[fetchAndSummarize] bestNode chosen:', bestNode?.nodeName, 'score:', bestScore);
-
-    // 4. Extract paragraphs from bestNode, filter junk, pick top paragraphs
-    let paragraphs = collectParagraphs(bestNode);
-    // filter out junk and extremely short ones
-    paragraphs = paragraphs.filter(p => !isJunkParagraph(p));
-    // if filtering removed everything, relax filter and keep paragraphs > 40 chars
+    // Extract paragraphs
+    let paragraphs = collectParagraphs(bestNode).filter(p => !isJunkParagraph(p));
     if (paragraphs.length === 0) {
       paragraphs = collectParagraphs(bestNode).filter(p => p.length > 40);
     }
 
-    // If still empty, fallback to full text of bestNode and split into sentences / chunks
-    let inputText = '';
-    if (paragraphs.length > 0) {
-      // take up to first 5 good paragraphs
-      inputText = paragraphs.slice(0, 5).join('\n\n');
-    } else {
-      const fallback = getNodeText(bestNode);
-      inputText = fallback.slice(0, 3000); // cap fallback length
-    }
-
+    let inputText = paragraphs.slice(0, 5).join('\n\n') || getNodeText(bestNode);
     inputText = inputText.replace(/\s+/g, ' ').trim();
-    if (!inputText) throw new Error('No usable article text found for summarization.');
 
-    // 5. Optional: if inputText is already short (<=300 chars), return it directly (no need to call HF)
-    if (inputText.length <= 300) {
-      console.log('[fetchAndSummarize] inputText is short — returning as-is (no HF call).');
-      return inputText;
+    // Validate input for Hugging Face
+    const wordCount = inputText.split(/\s+/).length;
+    if (wordCount < 50) {
+      return inputText; // too short, return as-is
     }
+    const truncatedText = inputText.slice(0, 3500);
 
-    // 6. Prepare truncation for HF model (models have input limits). Adjust as necessary.
-    const maxInputLen = 4000; // chars (tune based on model)
-    const truncatedText = inputText.length > maxInputLen ? inputText.slice(0, maxInputLen) : inputText;
-
-    // 7. Call Hugging Face summarization
-    if (!HUGGINGFACE_API_KEY) {
-      throw new Error('Hugging Face API key missing. Set HUGGINGFACE_API_KEY in .env');
-    }
-
+    // Hugging Face request
     const hfResponse = await fetch(HF_MODEL_URL, {
       method: 'POST',
       headers: {
@@ -187,23 +140,12 @@ export const fetchAndSummarize = async (url: string): Promise<string> => {
     });
 
     if (!hfResponse.ok) {
-      const errorBody = await hfResponse.text().catch(() => '');
-      throw new Error(`Hugging Face API error: ${hfResponse.status} ${hfResponse.statusText} - ${errorBody}`);
+      throw new Error(`Hugging Face API error: ${hfResponse.status} - ${await hfResponse.text()}`);
     }
 
     const result = await hfResponse.json();
-    if (Array.isArray(result) && result[0]?.summary_text) {
-      return result[0].summary_text.trim();
-    }
-
-    // Fallback if model returned unexpected shape
-    if (typeof result?.summary_text === 'string') {
-      return result.summary_text.trim();
-    }
-
-    // last resort: return first 500 chars of inputText
-    return inputText.slice(0, 500) + (inputText.length > 500 ? '...' : '');
-  } catch (err: any) {
+    return result?.[0]?.summary_text?.trim() || inputText;
+  } catch (err) {
     console.error('Error fetching and summarizing:', err);
     throw err;
   }

@@ -8,6 +8,7 @@ import { RootStackParamList } from './types';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import AddToCollectionScreen from './AddToCollectionScreen';
 import CollectionDetailScreen from './CollectionDetailScreen';
+import NonArticleDomainsScreen from './NonArticleDomainsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,7 +31,9 @@ export default function Navigation() {
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
         <Stack.Screen name="AddToCollection" component={AddToCollectionScreen} />
         <Stack.Screen name="CollectionDetail" component={CollectionDetailScreen} />
+        <Stack.Screen name="NonArticleDomains" component={NonArticleDomainsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+//
