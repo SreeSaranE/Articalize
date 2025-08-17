@@ -45,8 +45,8 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 - [x] Tag and organize
 - [x] Mobile app support
 - [x] Dark mode
-- [x] Search & Filter
-- [ ] AI summarization
+- [ ] Search & Filter
+- [x] AI summarization
 
 ---
 
@@ -59,6 +59,5 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 ### 💬 Community & Feedback
 
 * Issues and feature requests → [GitHub Issues](https://github.com/SreeSaranE/Articalize/issues)
-* Discussions and ideas → [GitHub Discussions](https://github.com/SreeSaranE/Articalize/discussions)
 
 ---
