@@ -9,7 +9,8 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
-  useColorScheme
+  useColorScheme,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +37,6 @@ export default function NonArticleDomainsScreen() {
 
   useEffect(() => {
     if (modalVisible) {
-      // Open keyboard automatically when modal is shown
       setTimeout(() => {
         inputRef.current?.focus();
       }, 300);
@@ -67,18 +67,25 @@ export default function NonArticleDomainsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
-      {/* Scrollable List */}
-      <Text style={[styles.modalTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
-        Non-Article Domain
+      {/* Header */}
+      <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
+        Non-Article Domains
       </Text>
-      <Text style={[styles.description, { color: isDarkMode ? '#fff' : '#000' }]}>
-        A Non-Article Domain is a website whose content typically doesn’t need full-text summarization - such as video platforms, 
-        social media sites, 
-        or search engines - because their primary pages don’t contain long-form articles.
-        Instead, the app can simply display the page title or domain name.
-        {"\n"}don't remove unless you know about it.
-        {"\n"}----------{"\n"}
-      </Text>
+
+      {/* Minimal description */}
+      <ScrollView
+        style={styles.descriptionBox}
+        contentContainerStyle={{ paddingBottom: 8 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.description, { color: isDarkMode ? '#ccc' : '#444' }]}>
+          These are domains that usually don’t need full-text summarization (e.g., social media, video platforms, search engines). 
+          The app will just display the title or domain instead.{"\n"}{"\n"}
+          ⚠️ Avoid removing unless you know what you’re doing.
+        </Text>
+      </ScrollView>
+
+      {/* List */}
       <FlatList
         data={domains}
         keyExtractor={(item) => item}
@@ -93,7 +100,7 @@ export default function NonArticleDomainsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      {/* Floating Add Button (same as dashboard) */}
+      {/* Floating Add Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setModalVisible(true)}
@@ -152,11 +159,16 @@ export default function NonArticleDomainsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 ,marginTop: 50},
+  container: { flex: 1, padding: 16, marginTop: 50 },
+  headerTitle: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  descriptionBox: { maxHeight: 120, marginBottom: 10 },
+  description: { fontSize: 14, lineHeight: 20 },
   domainItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: '#555',
   },
   domainText: { fontSize: 16 },
   fab: {
@@ -169,17 +181,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5
-  },
-  description: {
-    fontSize: 15,
-
+    elevation: 5,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)'
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     borderRadius: 12,
@@ -188,27 +196,27 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 12
+    marginBottom: 12,
   },
   input: {
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 40,
-    marginBottom: 16
+    marginBottom: 16,
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
   },
   modalButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
-    marginLeft: 8
+    marginLeft: 8,
   },
   modalButtonText: {
     color: '#fff',
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });

@@ -4,23 +4,21 @@ import { DEFAULT_DOMAINS } from './nonArticleDomains';
 
 const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
 
+// Hugging Face models usually max out ~1024 tokens (~2500–3000 chars)
+const MAX_INPUT_CHARS = 3000;
+
+console.log("HUGGINGFACE_API_KEY:", HUGGINGFACE_API_KEY ? "Loaded" : "Missing");
+
 const cleanHTML = (html: string): string => {
   return html
-    // Remove spaces after "<"
     .replace(/<\s+/g, '<')
-    // Replace &nbsp; with space
     .replace(/&nbsp;/g, ' ')
-    // Fix invalid self-closing attributes like attr="/ or attr=/
     .replace(/=\s*"[^"]*\/\s*"/g, match => match.replace(/\/\s*"/, '"'))
     .replace(/=\s*'[^']*\/\s*'/g, match => match.replace(/\/\s*'/, "'"))
-    // Remove stray slashes in attributes (e.g., id=/foo)
     .replace(/=\s*\/[^\s>]+/g, '')
-    // Collapse whitespace
     .replace(/\s+/g, ' ')
-    // Remove non-ASCII chars (to avoid parser choke)
     .replace(/[^\x00-\x7F]+/g, '');
 };
-
 
 const forEachChild = (nodeList: any, fn: (n: any) => void) => {
   if (!nodeList) return;
@@ -137,7 +135,9 @@ export const fetchAndSummarize = async (url: string): Promise<string> => {
     if (wordCount < 50) {
       return inputText; // too short, return as-is
     }
-    const truncatedText = inputText.slice(0, 3500);
+
+    // Truncate safely
+    const truncatedText = inputText.slice(0, MAX_INPUT_CHARS);
 
     // Hugging Face request
     const hfResponse = await fetch(HF_MODEL_URL, {
@@ -150,13 +150,15 @@ export const fetchAndSummarize = async (url: string): Promise<string> => {
     });
 
     if (!hfResponse.ok) {
-      throw new Error(`Hugging Face API error: ${hfResponse.status} - ${await hfResponse.text()}`);
+      console.warn("Hugging Face summarization failed, falling back to excerpt");
+      return truncatedText.substring(0, 300) + "..."; // fallback
     }
 
     const result = await hfResponse.json();
-    return result?.[0]?.summary_text?.trim() || inputText;
+
+    return result?.[0]?.summary_text?.trim() || truncatedText;
   } catch (err) {
     console.error('Error fetching and summarizing:', err);
-    throw err;
+    return "⚠️ Could not summarize this article.";
   }
 };

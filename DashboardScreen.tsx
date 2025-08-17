@@ -103,12 +103,21 @@ export default function DashboardScreen() {
     }
   };
 
+  const truncateWords = (text: string, maxWords: number): string => {
+    if (!text) return '';
+    const words = text.split(/\s+/);
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ') + '…';
+  };
+
   const renderArticle = ({ item }: { item: Article }) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
       style={styles.articleRow}
     >
-      <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>{item.title}</Text>
+      <Text style={[styles.articleTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
+        {truncateWords(item.title, 15)}
+      </Text>
     </TouchableOpacity>
   );
 
