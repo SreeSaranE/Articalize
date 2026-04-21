@@ -46,7 +46,7 @@ Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
 - [x] Mobile app support
 - [x] Dark mode
 - [ ] Search & Filter
-- [x] AI summarization
+- [ ] AI summarization
 
 ---
 
