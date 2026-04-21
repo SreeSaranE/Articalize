@@ -1,43 +1,80 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Learn more:
+# https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+############################
+# Dependencies
+############################
 node_modules/
 
-# Expo
-.expo/
+############################
+# Build / Output
+############################
 dist/
 web-build/
+coverage/
+
+############################
+# Expo
+############################
+.expo/
 expo-env.d.ts
 
-# Native
+############################
+# Native / Mobile
+############################
+/ios
+/android
 .kotlin/
-*.orig.*
+
+############################
+# Certificates / Keys
+############################
 *.jks
 *.p8
 *.p12
 *.key
+*.pem
 *.mobileprovision
 
+############################
 # Metro
+############################
 .metro-health-check*
 
-# debug
+############################
+# Logs / Debug
+############################
 npm-debug.*
+npm-debug.log*
 yarn-debug.*
+yarn-debug.log*
 yarn-error.*
+yarn-error.log*
 
-# macOS
-.DS_Store
-*.pem
-
-# local env files
+############################
+# Environment Files
+############################
+.env
+.env.local
 .env*.local
 
-# typescript
+############################
+# TypeScript
+############################
 *.tsbuildinfo
 
-app-example
+############################
+# Backup / Temp Files
+############################
+*.orig.*
 
-# generated native folders
-/ios
-/android
+############################
+# OS Files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Project Specific
+############################
+app-example
