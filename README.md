@@ -1,63 +1,50 @@
-## 📚 Articalize
+# Welcome to your Expo app 👋
 
-**Articalize** is an open-source application that helps you **save, organize, and view articles** in a beautiful, card-based layout. Whether you're a researcher, reader, or knowledge hoarder, Articalize makes your reading list tidy and accessible.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
----
+## Get started
 
-### ✨ Features
+1. Install dependencies
 
-* 📥 **Save Articles** – Store articles with metadata like title, URL, image, and summary.
-* 🗂️ **Organize** – Use tags and folders to keep your articles organized.
-* 🖼️ **List UI** – Clean, responsive card-style interface for browsing saved articles.
-* 🔍 **Search & Filter** – Quickly find articles by title, tag, or source.
-* 🧠 **AI Summarization & Tagging** – (Future) Automatically summarize and categorize saved content.
+   ```bash
+   npm install
+   ```
 
----
+2. Start the app
 
-### 🚀 Tech Stack
+   ```bash
+   npx expo start
+   ```
 
-| Layer    | Tech                      |
-| -------- | ------------------------- |
-| Frontend | React.js                  |
-| Database | AsyncStorage              |
+In the output, you'll find options to open the app in a
 
-> 📱 Plans for a mobile app using React Native or Flutter are in the roadmap.
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
----
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-### 🛠️ Contributing
+## Get a fresh project
 
-We welcome contributions! 🎉
+When you're ready, run:
 
-1. Fork this repo
-2. Create your feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'Add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
+```bash
+npm run reset-project
+```
 
-Check out [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more guidelines.
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
----
+## Learn more
 
-### 🗺️ Roadmap
+To learn more about developing your project with Expo, look at the following resources:
 
-- [x] Save article cards
-- [x] Tag and organize
-- [x] Mobile app support
-- [x] Dark mode
-- [ ] Search & Filter
-- [ ] AI summarization
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
----
+## Join the community
 
-### 📄 License
+Join our community of developers creating universal apps.
 
-**MIT** – Free to use, modify, and distribute.
-
----
-
-### 💬 Community & Feedback
-
-* Issues and feature requests → [GitHub Issues](https://github.com/SreeSaranE/Articalize/issues)
-
----
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
