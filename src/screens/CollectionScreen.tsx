@@ -1,13 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   useFocusEffect,
@@ -45,7 +46,7 @@ export default function CollectionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={styles.header}>
         Collections
       </Text>

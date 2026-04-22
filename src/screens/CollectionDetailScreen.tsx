@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -50,7 +51,7 @@ export default function CollectionDetailScreen() {
   if (!collection) return null;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={styles.header}>
         {collection.name}
       </Text>

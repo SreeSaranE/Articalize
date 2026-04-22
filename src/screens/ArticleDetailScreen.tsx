@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {
   Linking,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   useNavigation,
@@ -108,7 +109,7 @@ export default function ArticleDetailScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         contentContainerStyle={{
           padding: 18

@@ -1,14 +1,15 @@
 import React from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity
 } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 export default function SettingsScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={styles.header}>Settings</Text>
 
       <TouchableOpacity style={styles.item}>

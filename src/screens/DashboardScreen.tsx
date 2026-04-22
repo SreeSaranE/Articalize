@@ -3,13 +3,15 @@ import React, { useCallback, useState } from 'react';
 import {
   Alert,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { fetchPageTitle } from '../services/fetchPageTitle';
 import { addArticle, getArticles } from '../services/storage';
 import { Article } from '../types';
@@ -61,7 +63,7 @@ export default function DashboardScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={styles.header}>Articalize</Text>
 
       <View style={styles.row}>
