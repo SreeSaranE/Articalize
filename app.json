@@ -3,10 +3,8 @@
     "name": "Articalize",
     "slug": "articalize",
     "version": "2.0.0",
-
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-
     "scheme": "articalize",
 
     "ios": {
@@ -22,12 +20,8 @@
       "bundler": "metro"
     },
 
-    "plugins": [],
-
     "extra": {
-      "eas": {
-        "projectId": "replace-with-your-project-id"
-      }
+      "geminiApiKey": "AIzaSyAw131JIL9dFnHHK9MFXlGObi8uqaINZ_M"
     }
   }
 }

@@ -14,8 +14,13 @@ export async function saveArticles(data: Article[]) {
 }
 
 export async function addArticle(article: Article) {
-  const current = await getArticles();
-  await saveArticles([article, ...current]);
+  const all = await getArticles();
+  await saveArticles([article, ...all]);
+}
+
+export async function deleteArticle(id: string) {
+  const all = await getArticles();
+  await saveArticles(all.filter(x => x.id !== id));
 }
 
 export async function getCollections(): Promise<Collection[]> {
@@ -28,7 +33,7 @@ export async function saveCollections(data: Collection[]) {
 }
 
 export async function addCollection(name: string) {
-  const current = await getCollections();
+  const all = await getCollections();
 
   const item: Collection = {
     id: Date.now().toString(),
@@ -36,56 +41,29 @@ export async function addCollection(name: string) {
     articleIds: []
   };
 
-  await saveCollections([item, ...current]);
+  await saveCollections([item, ...all]);
 }
 
 export async function deleteCollection(id: string) {
-  const current = await getCollections();
-  await saveCollections(current.filter(x => x.id !== id));
+  const all = await getCollections();
+  await saveCollections(all.filter(x => x.id !== id));
 }
 
 export async function addArticleToCollection(
   articleId: string,
   collectionId: string
 ) {
-  const current = await getCollections();
+  const all = await getCollections();
 
-  const updated = current.map(c => {
-    if (c.id !== collectionId) return c;
-
-    if (c.articleIds.includes(articleId)) return c;
-
-    return {
-      ...c,
-      articleIds: [...c.articleIds, articleId]
-    };
-  });
-
-  await saveCollections(updated);
-}
-
-export async function removeArticleFromCollection(
-  articleId: string,
-  collectionId: string
-) {
-  const current = await getCollections();
-
-  const updated = current.map(c => {
-    if (c.id !== collectionId) return c;
-
-    return {
-      ...c,
-      articleIds: c.articleIds.filter(id => id !== articleId)
-    };
-  });
-
-  await saveCollections(updated);
-}
-
-export async function deleteArticle(id: string) {
-  const current = await getArticles();
-
-  await saveArticles(
-    current.filter(a => a.id !== id)
+  const updated = all.map(c =>
+    c.id === collectionId &&
+    !c.articleIds.includes(articleId)
+      ? {
+          ...c,
+          articleIds: [...c.articleIds, articleId]
+        }
+      : c
   );
+
+  await saveCollections(updated);
 }
