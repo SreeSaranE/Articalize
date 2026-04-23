@@ -67,3 +67,23 @@ export async function addArticleToCollection(
 
   await saveCollections(updated);
 }
+
+export async function removeArticleFromCollection(
+  articleId: string,
+  collectionId: string
+) {
+  const all = await getCollections();
+
+  const updated = all.map(c =>
+    c.id === collectionId
+      ? {
+          ...c,
+          articleIds: c.articleIds.filter(
+            id => id !== articleId
+          )
+        }
+      : c
+  );
+
+  await saveCollections(updated);
+}

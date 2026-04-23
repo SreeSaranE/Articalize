@@ -6,22 +6,21 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "scheme": "articalize",
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.articalize.app"
     },
-
     "android": {
       "package": "com.articalize.app"
     },
-
     "web": {
       "bundler": "metro"
     },
-
     "extra": {
-      "geminiApiKey": "AIzaSyAw131JIL9dFnHHK9MFXlGObi8uqaINZ_M"
+      "geminiApiKey": "AIzaSyAw131JIL9dFnHHK9MFXlGObi8uqaINZ_M",
+      "eas": {
+        "projectId": "62de34e8-ddd9-4458-a600-3e058d253a42"
+      }
     }
   }
 }

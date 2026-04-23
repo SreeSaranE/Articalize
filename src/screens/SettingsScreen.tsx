@@ -24,7 +24,7 @@ export default function SettingsScreen() {
         <Text style={styles.text}>Privacy Policy</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Articalize v2.0.1</Text>
+      <Text style={styles.version}>Articalize v2.0.2</Text>
     </SafeAreaView>
   );
 }
