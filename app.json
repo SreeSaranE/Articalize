@@ -2,25 +2,57 @@
   "expo": {
     "name": "Articalize",
     "slug": "articalize",
-    "version": "2.0.0",
+    "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "articalize",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.articalize.app"
+      "supportsTablet": true
     },
     "android": {
-      "package": "com.articalize.app"
+      "adaptiveIcon": {
+        "backgroundColor": "#D9D9D9",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "skurd.articalize"
     },
     "web": {
-      "bundler": "metro"
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font",
+      "expo-status-bar",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#D9D9D9",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
+    "scheme": "articalize",
+    "experiments": {
+      "typedRoutes": true
     },
     "extra": {
-      "geminiApiKey": "AIzaSyAw131JIL9dFnHHK9MFXlGObi8uqaINZ_M",
+      "router": {},
       "eas": {
-        "projectId": "62de34e8-ddd9-4458-a600-3e058d253a42"
+        "projectId": "e1ead431-404c-496c-9b28-b74912f439ac"
       }
-    }
+    },
+    "owner": "sreesaran.elangovan"
   }
 }
