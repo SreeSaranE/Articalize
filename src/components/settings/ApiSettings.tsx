@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { AVAILABLE_MODELS } from '../../types';
 import { useTheme, spacing, radius, type } from '../../theme';
 import { SectionLabel, SettingsPage } from './shared';
@@ -17,6 +18,17 @@ export const ApiSettings: React.FC = () => {
   useEffect(() => {
     UsageService.get().then(u => setUsage({ ...u }));
   }, []);
+
+  const openAiStudio = async () => {
+    try {
+      await WebBrowser.openBrowserAsync('https://aistudio.google.com/api-keys', {
+        toolbarColor: colors.background,
+        controlsColor: colors.accent,
+      });
+    } catch {
+      // ignore
+    }
+  };
 
   const commitKey = () => {
     const trimmed = apiKey.trim();
@@ -65,6 +77,33 @@ export const ApiSettings: React.FC = () => {
       <Text style={[type.caption, styles.hint, { color: colors.textSecondary }]}>
         Get a key from Google AI Studio. It is stored in your device keystore and only sent to Google.
       </Text>
+
+      {!apiKey.trim() && (
+        <View style={styles.guideContainer}>
+          <SectionLabel>How to get an API key</SectionLabel>
+          <View style={styles.stepsList}>
+            <Pressable
+              onPress={openAiStudio}
+              accessibilityRole="link"
+              style={({ pressed }) => [styles.stepLink, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text style={[type.body, { color: colors.accent, fontWeight: '500' }]}>
+                1. Open Google AI Studio
+              </Text>
+              <Ionicons name="open-outline" size={15} color={colors.accent} />
+            </Pressable>
+            <Text style={[type.body, { color: colors.textSecondary }]}>
+              2. Sign in with your Google account.
+            </Text>
+            <Text style={[type.body, { color: colors.textSecondary }]}>
+              3. Tap <Text style={{ color: colors.text, fontWeight: '500' }}>Create API key</Text> and choose a project.
+            </Text>
+            <Text style={[type.body, { color: colors.textSecondary }]}>
+              4. Copy your key and paste it into the field above.
+            </Text>
+          </View>
+        </View>
+      )}
 
       <SectionLabel>Model</SectionLabel>
       {AVAILABLE_MODELS.map(m => {
@@ -124,5 +163,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 48,
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  guideContainer: { marginTop: spacing.xs },
+  stepsList: { gap: spacing.sm, marginTop: spacing.xs },
+  stepLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 2,
+    alignSelf: 'flex-start',
   },
 });
