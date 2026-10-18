@@ -18,6 +18,8 @@ import { useTheme, spacing, radius, type } from '../theme';
 
 type Status = 'idle' | 'saving' | 'success' | 'error';
 
+const AUTO_DISMISS_MS = 3000;
+
 export const ShareIntentHandler: React.FC = () => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -31,7 +33,8 @@ export const ShareIntentHandler: React.FC = () => {
   const [message, setMessage] = useState('');
   const [savedId, setSavedId] = useState<string | null>(null);
 
-  const [slideAnim] = useState(() => new Animated.Value(-120));
+  const [slideAnim] = useState(() => new Animated.Value(40));
+  const [opacityAnim] = useState(() => new Animated.Value(0));
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -43,27 +46,41 @@ export const ShareIntentHandler: React.FC = () => {
 
   const dismiss = useCallback(() => {
     clearTimer();
-    Animated.timing(slideAnim, {
-      toValue: -120,
-      duration: 220,
-      easing: Easing.in(Easing.cubic),
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 30,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       setStatus('idle');
       setMessage('');
       setSavedId(null);
     });
-  }, [clearTimer, slideAnim]);
+  }, [clearTimer, slideAnim, opacityAnim]);
 
   const show = useCallback(() => {
     clearTimer();
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      damping: 18,
-      stiffness: 160,
-    }).start();
-  }, [clearTimer, slideAnim]);
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 18,
+        stiffness: 160,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [clearTimer, slideAnim, opacityAnim]);
 
   const handleShare = useCallback(
     async (rawText: string) => {
@@ -73,7 +90,7 @@ export const ShareIntentHandler: React.FC = () => {
         setStatus('error');
         setMessage('No link found in shared content');
         show();
-        dismissTimer.current = setTimeout(dismiss, 4000);
+        dismissTimer.current = setTimeout(dismiss, AUTO_DISMISS_MS);
         return;
       }
 
@@ -87,11 +104,11 @@ export const ShareIntentHandler: React.FC = () => {
         setStatus('success');
         setMessage(article.title || 'Article saved!');
         setSavedId(article.id);
-        dismissTimer.current = setTimeout(dismiss, 5000);
+        dismissTimer.current = setTimeout(dismiss, AUTO_DISMISS_MS);
       } catch (e) {
         setStatus('error');
         setMessage(e instanceof Error ? e.message : 'Could not save article');
-        dismissTimer.current = setTimeout(dismiss, 4000);
+        dismissTimer.current = setTimeout(dismiss, AUTO_DISMISS_MS);
       }
     },
     [addArticle, clearTimer, dismiss, show]
@@ -127,77 +144,54 @@ export const ShareIntentHandler: React.FC = () => {
       style={[
         styles.container,
         {
-          top: insets.top + spacing.sm,
+          bottom: Math.max(insets.bottom, 12) + 60,
+          opacity: opacityAnim,
           transform: [{ translateY: slideAnim }],
         },
       ]}
       pointerEvents="box-none"
     >
-      <View
-        style={[
-          styles.banner,
+      <Pressable
+        onPress={savedId ? openSaved : undefined}
+        disabled={!savedId}
+        accessibilityRole={savedId ? 'button' : undefined}
+        accessibilityLabel={savedId ? 'View saved article' : undefined}
+        style={({ pressed }) => [
+          styles.toast,
           {
             backgroundColor: colors.surface,
             borderColor: colors.separator,
-            shadowColor: '#000',
+            opacity: pressed && savedId ? 0.8 : 1,
           },
         ]}
       >
-        <View style={styles.iconCol}>
+        <View style={styles.icon}>
           {status === 'saving' && (
             <ActivityIndicator size="small" color={colors.accent} />
           )}
           {status === 'success' && (
-            <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
+            <Ionicons name="checkmark-circle" size={18} color={colors.accent} />
           )}
           {status === 'error' && (
-            <Ionicons name="alert-circle" size={22} color={colors.danger} />
+            <Ionicons name="alert-circle" size={18} color={colors.danger} />
           )}
         </View>
 
-        <View style={styles.textCol}>
-          <Text
-            style={[type.caption, { color: colors.textSecondary, fontWeight: '500' }]}
-            numberOfLines={1}
-          >
-            {status === 'saving'
-              ? 'Incoming Share'
-              : status === 'success'
-                ? 'Saved to Library'
-                : 'Share Error'}
-          </Text>
-          <Text
-            style={[type.body, { color: colors.text, fontWeight: '500' }]}
-            numberOfLines={2}
-          >
-            {message}
-          </Text>
-        </View>
+        <Text
+          style={[type.caption, styles.message, { color: colors.text, fontWeight: '500' }]}
+          numberOfLines={1}
+        >
+          {status === 'saving' ? 'Saving article…' : message}
+        </Text>
 
         {status === 'success' && savedId && (
-          <Pressable
-            onPress={openSaved}
-            accessibilityRole="button"
-            accessibilityLabel="View article"
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: colors.accent, opacity: pressed ? 0.8 : 1 },
-            ]}
-          >
-            <Text style={[type.label, { color: colors.onAccent, fontSize: 13 }]}>View</Text>
-          </Pressable>
+          <View style={[styles.viewBadge, { backgroundColor: colors.accent }]}>
+            <Text style={[type.caption, { color: colors.onAccent, fontWeight: '600', fontSize: 11 }]}>
+              View
+            </Text>
+          </View>
         )}
-
-        <Pressable
-          onPress={dismiss}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Dismiss banner"
-          style={styles.closeButton}
-        >
-          <Ionicons name="close" size={18} color={colors.textTertiary} />
-        </Pressable>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 };
@@ -207,38 +201,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
+    alignItems: 'center',
     zIndex: 9999,
   },
-  banner: {
+  toast: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    elevation: 8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-  },
-  iconCol: {
-    width: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textCol: {
-    flex: 1,
-    gap: 2,
-  },
-  actionButton: {
-    paddingHorizontal: spacing.md,
-    height: 32,
     borderRadius: radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    maxWidth: '90%',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+  },
+  icon: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeButton: {
-    padding: spacing.xs,
+  message: {
+    flexShrink: 1,
+  },
+  viewBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
   },
 });
