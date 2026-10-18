@@ -34,6 +34,22 @@ export function normalizeUrl(input: string): string | null {
   }
 }
 
+export function extractUrlFromText(raw: string): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const match = raw.match(/https?:\/\/[^\s"'<>]+/i);
+  if (match) {
+    const candidate = match[0].replace(/[)"'>}\].,;!]+$/, '');
+    return normalizeUrl(candidate);
+  }
+  const words = raw.trim().split(/\s+/);
+  for (const word of words) {
+    const cleanWord = word.replace(/^[("'<{[]+/, '').replace(/[)"'>}\].,;!]+$/, '');
+    const normalized = normalizeUrl(cleanWord);
+    if (normalized) return normalized;
+  }
+  return null;
+}
+
 const readMinutes = (text: string) => Math.max(1, Math.round(text.split(/\s+/).length / 220));
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 

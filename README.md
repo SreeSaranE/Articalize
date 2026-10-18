@@ -14,6 +14,7 @@ No accounts, no third-party servers, no tracking.
 ## ✨ Features
 
 - **Clean Article Extraction** – Strips ads, scripts, and clutter locally using `@mozilla/readability`. Dedicated fast-path for Wikipedia pages.
+- **System Share Target (Android)** – Share links directly from Chrome, Twitter, or other apps into Articalize to auto-save articles.
 - **BYOK AI Summaries** – Plug in your Google Gemini API key to generate concise takeaways and key significance notes on demand.
 - **Collections & Organization** – Group articles into collections with list or grid views. Search and filter by read, unread, or bookmarked.
 - **Privacy & Local Storage** – All content stays on your device. Your Gemini key is securely stored in the native device keystore (`expo-secure-store`).

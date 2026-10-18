@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useLibrary } from '../store/library';
-import { normalizeUrl } from '../services/extractor';
+import { extractUrlFromText, normalizeUrl } from '../services/extractor';
 import { useTheme, spacing, radius, type } from '../theme';
 
 export default function AddArticleScreen() {
@@ -22,7 +22,8 @@ export default function AddArticleScreen() {
   useEffect(() => {
     Clipboard.getStringAsync()
       .then(text => {
-        if (/^https?:\/\//i.test(text.trim()) && normalizeUrl(text)) setUrl(text.trim());
+        const found = extractUrlFromText(text);
+        if (found) setUrl(found);
       })
       .catch(() => undefined);
   }, []);

@@ -41,6 +41,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-share-intent",
+        {
+          "disableIOS": true,
+          "androidIntentFilters": ["text/*"]
+        }
       ]
     ],
     "scheme": "articalize",
